@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import api from "../../api/api";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminTopbar from "./components/AdminTopbar";
-import { FiPlus, FiTrash, FiUpload } from "react-icons/fi";
+import { FiTrash, FiUpload } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { useSidebar } from "../../context/SidebarContext";
 
@@ -183,7 +183,7 @@ export default function ProductManagement() {
   };
 
   return (
-    <div className="flex h-screen bg-[#E6E6E6] overflow-hidden">
+    <div className="flex h-screen bg-cream overflow-hidden">
       <AdminSidebar />
 
       <div
@@ -194,9 +194,10 @@ export default function ProductManagement() {
         <AdminTopbar toggleSidebar={toggle} isSidebarOpen={!collapsed} />
 
         <div className="flex-1 p-6 overflow-y-auto">
-          <h1 className="text-3xl font-bold text-[#5A381E] mb-6">
-            Add product
-          </h1>
+          <header className="mb-6">
+            <h1 className="text-3xl font-bold text-brand-deep">Add Product</h1>
+            <p className="text-sm text-gray-500">Create a new item for the customer menu</p>
+          </header>
 
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow">
           <div className="grid grid-cols-2 gap-6">
@@ -209,7 +210,7 @@ export default function ProductManagement() {
                 value={form.name}
                 onChange={handleChange}
                 required
-                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B3611B]"
+                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
                 placeholder="Enter product name"
               />
             </div>
@@ -225,7 +226,7 @@ export default function ProductManagement() {
                   setForm({ ...form, category_id: e.target.value })
                 }
                 required
-                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B3611B]"
+                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
               >
                 <option value="">Select category</option>
                 {orderedCategories.length === 0 ? (
@@ -245,18 +246,9 @@ export default function ProductManagement() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Image
               </label>
-              <div className="flex items-center gap-3 mb-2">
-                <FiPlus className="text-gray-400" />
-                {form.image && (
-                  <FiTrash
-                    className="text-red-500 cursor-pointer hover:text-red-700"
-                    onClick={handleImageRemove}
-                  />
-                )}
-              </div>
 
               {!preview ? (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#B3611B] transition">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-brand transition">
                   <FiUpload className="mx-auto text-4xl text-gray-400 mb-3" />
                   <p className="text-gray-600 mb-2">
                     Drag & drop to upload or browse
@@ -271,7 +263,7 @@ export default function ProductManagement() {
                   />
                   <label
                     htmlFor="image-upload"
-                    className="cursor-pointer text-[#B3611B] hover:underline"
+                    className="cursor-pointer text-brand hover:underline"
                   >
                     Browse files
                   </label>
@@ -314,7 +306,7 @@ export default function ProductManagement() {
                     }))
                   }
                   required
-                  className="w-full border border-gray-300 px-3 py-2 pl-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B3611B]"
+                  className="w-full border border-gray-300 px-3 py-2 pl-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
                   placeholder="0.00"
                 />
               </div>
@@ -330,7 +322,7 @@ export default function ProductManagement() {
                 onChange={(e) =>
                   setForm({ ...form, is_available: e.target.value === "1" })
                 }
-                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B3611B]"
+                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
               >
                 <option value="">select status</option>
                 <option value="1">Available</option>
@@ -346,20 +338,13 @@ export default function ProductManagement() {
                 name="description"
                 value={form.description}
                 onChange={handleChange}
-                className="w-full border border-gray-300 px-3 py-2 rounded-lg h-32 focus:outline-none focus:ring-2 focus:ring-[#B3611B]"
+                className="w-full border border-gray-300 px-3 py-2 rounded-lg h-32 focus:outline-none focus:ring-2 focus:ring-brand"
                 placeholder="Enter product description"
               ></textarea>
             </div>
           </div>
 
-          <div className="flex justify-between mt-8">
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-[#B3611B] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#9a5015] transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Adding..." : "ADD"}
-            </button>
+          <div className="flex justify-end gap-3 mt-8">
 
             <button
               type="button"
@@ -374,9 +359,16 @@ export default function ProductManagement() {
                 });
                 setPreview(null);
               }}
-              className="border-2 border-[#B3611B] text-[#B3611B] px-8 py-3 rounded-lg font-semibold hover:bg-[#B3611B] hover:text-white transition"
+              className="border border-line bg-white text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-sand transition"
             >
-              CANCEL
+              Clear Form
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-brand text-white px-8 py-3 rounded-lg font-semibold hover:bg-brand-hover transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? "Adding..." : "Add Product"}
             </button>
           </div>
         </form>

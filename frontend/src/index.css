@@ -6,16 +6,12 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #fff5f8; /* light bakery pink */
-  font-family: "Poppins", sans-serif;
+  background-color: #fff8f0; /* cream, matches the customer pages */
+  color: #374151;
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Remove default padding for admin pages */
-html body {
-  padding-top: 0 !important;
-}
-
-/* React DatePicker Pink Theme Styles */
+/* React DatePicker, Sweet Bite brand colors */
 .react-datepicker {
   border: none;
   border-radius: 1rem;
@@ -24,7 +20,7 @@ html body {
 }
 
 .react-datepicker__header {
-  background-color: #ec4899;
+  background-color: #974D07;
   border-bottom: none;
   border-radius: 1rem 1rem 0 0;
   padding-top: 0.75rem;
@@ -40,13 +36,13 @@ html body {
 .react-datepicker__day--selected,
 .react-datepicker__day--keyboard-selected,
 .react-datepicker__day:hover {
-  background-color: #ec4899 !important;
+  background-color: #974D07 !important;
   color: white;
   border-radius: 0.5rem;
 }
 
 .react-datepicker__day--today {
-  border: 2px solid #ec4899;
+  border: 2px solid #974D07;
   font-weight: 600;
 }
 
@@ -55,7 +51,7 @@ html body {
   .react-datepicker__time-box
   ul.react-datepicker__time-list
   li.react-datepicker__time-list-item--selected {
-  background-color: #ec4899 !important;
+  background-color: #974D07 !important;
 }
 
 .react-datepicker__time-container
@@ -63,7 +59,7 @@ html body {
   .react-datepicker__time-box
   ul.react-datepicker__time-list
   li.react-datepicker__time-list-item:hover {
-  background-color: #fce7f3 !important;
+  background-color: #F0E6DD !important;
 }
 
 .react-datepicker__navigation-icon::before {
@@ -71,5 +67,5 @@ html body {
 }
 
 .react-datepicker__navigation:hover *::before {
-  border-color: #fce7f3;
+  border-color: #F0E6DD;
 }

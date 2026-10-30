@@ -303,7 +303,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-[#E6E6E6] overflow-hidden">
+    <div className="flex h-screen bg-cream overflow-hidden">
       <AdminSidebar />
 
       {/* Right content */}
@@ -320,7 +320,7 @@ export default function AdminDashboard() {
           {/* HEADER */}
           <header className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold text-[#5A381E]">
+              <h1 className="text-3xl font-bold text-brand-deep">
                 Dashboard
               </h1>
               <p className="text-sm text-gray-500">
@@ -335,13 +335,13 @@ export default function AdminDashboard() {
                 placeholder="Search products..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-56 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#B3611B]"
+                className="w-56 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"
               />
 
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#B3611B]"
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand"
                 aria-label="Sort categories"
               >
                 <option value="all">All categories</option>
@@ -355,7 +355,7 @@ export default function AdminDashboard() {
               <select
                 value={priceSort}
                 onChange={(e) => setPriceSort(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#B3611B]"
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand"
                 aria-label="Sort by price"
               >
                 <option value="asc">Price: lowest - highest</option>
@@ -368,7 +368,7 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div className="bg-white p-5 rounded-xl shadow">
               <div className="text-sm text-gray-600">Total Products</div>
-              <div className="text-3xl font-bold text-[#5A381E]">
+              <div className="text-3xl font-bold text-brand-deep">
                 {stats.total}
               </div>
             </div>
@@ -391,7 +391,7 @@ export default function AdminDashboard() {
           {/* Recent Products - Standalone Card */}
           <div className="bg-white rounded-xl p-5 shadow border border-gray-200 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-[#5A381E]">Recent Products</h3>
+              <h3 className="text-lg font-semibold text-brand-deep">Recent Products</h3>
               <span className="text-xs text-gray-500">Latest</span>
             </div>
 
@@ -415,7 +415,7 @@ export default function AdminDashboard() {
                   <div className="text-center w-full">
                     <div className="font-medium text-sm text-gray-800 truncate">{p.name}</div>
                     <div className="text-xs text-gray-400 mb-1">{p.category?.name || "—"}</div>
-                    <div className="text-sm font-semibold text-[#B3611B]">
+                    <div className="text-sm font-semibold text-brand">
                       ₱{Number(p.base_price).toFixed(2)}
                     </div>
                   </div>
@@ -497,7 +497,7 @@ export default function AdminDashboard() {
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => handleEditClick(p)}
-                            className="p-2 text-[#B3611B] hover:bg-[#B3611B] hover:text-white rounded-lg transition"
+                            className="p-2 text-brand hover:bg-brand hover:text-white rounded-lg transition"
                             title="Edit product"
                           >
                             <FiEdit />
@@ -526,7 +526,7 @@ export default function AdminDashboard() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-[#5A381E]">Edit Product</h2>
+              <h2 className="text-2xl font-bold text-brand-deep">Edit Product</h2>
               <button
                 onClick={handleCloseEditModal}
                 className="p-2 hover:bg-gray-100 rounded-lg transition"
@@ -546,7 +546,7 @@ export default function AdminDashboard() {
                     value={editForm.name}
                     onChange={handleEditChange}
                     required
-                    className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B3611B]"
+                    className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
                     placeholder="Enter product name"
                   />
                 </div>
@@ -560,7 +560,7 @@ export default function AdminDashboard() {
                     value={editForm.category_id || ""}
                     onChange={handleEditChange}
                     required
-                    className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B3611B]"
+                    className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
                   >
                     <option value="">Select category</option>
                     {categories.map((cat) => (
@@ -589,7 +589,7 @@ export default function AdminDashboard() {
                       />
                       <label
                         htmlFor="edit-image-upload"
-                        className="cursor-pointer text-[#B3611B] hover:underline"
+                        className="cursor-pointer text-brand hover:underline"
                       >
                         Browse files
                       </label>
@@ -635,7 +635,7 @@ export default function AdminDashboard() {
                         }))
                       }
                       required
-                      className="w-full border border-gray-300 px-3 py-2 pl-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B3611B]"
+                      className="w-full border border-gray-300 px-3 py-2 pl-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
                       placeholder="0.00"
                     />
                   </div>
@@ -649,7 +649,7 @@ export default function AdminDashboard() {
                     name="is_available"
                     value={editForm.is_available}
                     onChange={handleEditChange}
-                    className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B3611B]"
+                    className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
                   >
                     <option value="1">Available</option>
                     <option value="0">Out of Stock</option>
@@ -664,7 +664,7 @@ export default function AdminDashboard() {
                     name="description"
                     value={editForm.description}
                     onChange={handleEditChange}
-                    className="w-full border border-gray-300 px-3 py-2 rounded-lg h-32 focus:outline-none focus:ring-2 focus:ring-[#B3611B]"
+                    className="w-full border border-gray-300 px-3 py-2 rounded-lg h-32 focus:outline-none focus:ring-2 focus:ring-brand"
                     placeholder="Enter product description"
                   ></textarea>
                 </div>
@@ -681,7 +681,7 @@ export default function AdminDashboard() {
                 <button
                   type="submit"
                   disabled={editLoading}
-                  className="px-6 py-2 bg-[#B3611B] text-white rounded-lg font-semibold hover:bg-[#9a5015] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-brand text-white rounded-lg font-semibold hover:bg-brand-hover transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {editLoading ? "Updating..." : "Update Product"}
                 </button>

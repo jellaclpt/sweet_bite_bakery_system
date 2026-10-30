@@ -13,6 +13,13 @@ use Carbon\Carbon;
 
 class OrderController extends Controller
 {
+    // Order lifecycle: pending (awaiting deposit) -> confirmed -> preparing -> ready -> completed.
+    // "processing" and "ready for pickup" are kept so older orders stay valid.
+    public const STATUSES = [
+        'pending', 'confirmed', 'preparing', 'ready', 'completed', 'cancelled',
+        'processing', 'ready for pickup',
+    ];
+
     // Place new order
     public function store(Request $request)
     {
@@ -23,7 +30,8 @@ class OrderController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
             'fulfillment' => 'required|in:pickup,delivery',
             'pickup_time' => 'nullable|date|after:now',
-            'payment_method' => 'required|string'
+            // Method the customer plans to use; the deposit itself is sent via GCash
+            'payment_method' => 'nullable|string|in:gcash,cash'
         ]);
 
         if ($request->fulfillment === 'pickup' && $request->pickup_time) {
@@ -50,6 +58,10 @@ class OrderController extends Controller
 
         $total = $subtotal; // (later you can add shipping/discounts)
 
+        // Pre-orders are confirmed with an upfront deposit; the balance is paid at pickup or delivery
+        $depositPercent = max(0, min(100, (int) config('bakery.deposit_percent')));
+        $deposit = round($total * $depositPercent / 100, 2);
+
         // Create order
         $order = Order::create([
             'user_id' => $request->user_id,
@@ -57,9 +69,11 @@ class OrderController extends Controller
             'discount' => 0,
             'shipping_fee' => 0,
             'total' => $total,
+            'deposit_amount' => $deposit,
+            'amount_paid' => 0,
             'status' => 'pending',
-            'payment_method' => $request->payment_method,
-            'payment_status' => 'unpaid',
+            'payment_method' => $request->payment_method ?? 'gcash',
+            'payment_status' => $deposit > 0 ? Order::PAYMENT_AWAITING_DEPOSIT : 'unpaid',
             'fulfillment' => $request->fulfillment,
             'pickup_time' => $request->pickup_time
         ]);
@@ -106,7 +120,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|string|in:pending,processing,completed,cancelled,ready for pickup'
+            'status' => 'required|string|in:' . implode(',', self::STATUSES)
         ]);
 
         $order = Order::findOrFail($id);
@@ -137,7 +151,7 @@ class OrderController extends Controller
     {
         $orders = \App\Models\Order::where('user_id', $user_id)
             ->orderBy('created_at', 'desc')
-            ->with('items')
+            ->with('items.product:id,name,image_url')
             ->get();
 
         return response()->json($orders);

@@ -1,5 +1,8 @@
+import logo from '../assets/logo.png';
+
 export const getImageUrl = (imagePath) => {
-  if (!imagePath) return '/placeholder.png';
+  // Fall back to the bakery logo (the old /placeholder.png did not exist)
+  if (!imagePath) return logo;
 
   // If it's already a full URL, return it unchanged
   if (imagePath.startsWith('http')) return imagePath;

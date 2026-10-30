@@ -1,5 +1,7 @@
 // src/pages/Profile.js
 import React, { useState, useEffect, useRef } from "react";
+import { KeyRound, Lock, X } from "lucide-react";
+import { AuthField } from "../components/AuthLayout";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
@@ -35,7 +37,7 @@ export default function Profile() {
         address: user.address || "",
         image: null,
       });
-      setPreview(getImageUrl(user.image_url) || null);
+      setPreview(user.image_url ? getImageUrl(user.image_url) : null);
       return;
     }
 
@@ -54,7 +56,7 @@ export default function Profile() {
           address: u.address || "",
           image: null,
         });
-        setPreview(getImageUrl(u.image_url) || null);
+        setPreview(u.image_url ? getImageUrl(u.image_url) : null);
       } catch (err) {
         console.warn("Could not fetch user:", err?.response?.data || err);
       }
@@ -237,25 +239,25 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen py-20 px-4" style={{ backgroundColor: "#fff8f0" }}>
-      <div className="bg-white shadow-lg rounded-2xl p-6 sm:p-8 w-full max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 text-center" style={{ color: "#974D07" }}>My Profile</h1>
+    <div className="min-h-screen pt-6 pb-8 px-4 bg-cream">
+      <div className="bg-white shadow-sm border border-line rounded-2xl p-6 sm:p-8 w-full max-w-lg mx-auto">
+        <h1 className="text-3xl font-bold mb-6 text-center text-brand">My Profile</h1>
 
         <div className="flex justify-center mb-6">
           <div
             onClick={handleImageClick}
-            className="relative w-32 h-32 rounded-full flex items-center justify-center cursor-pointer overflow-hidden border-4"
+            className="group relative w-32 h-32 rounded-full flex items-center justify-center cursor-pointer overflow-hidden border-4"
             style={{ backgroundColor: "#f0e6dd", borderColor: "#e8ddd2" }}
           >
             {preview ? (
-              <img src={preview} className="w-full h-full object-cover" alt="👤" />
+              <img src={preview} className="w-full h-full object-cover" alt="Profile" />
             ) : (
-              <span className="text-6xl flex items-center justify-center w-full h-full select-none" style={{ color: "#d4a574" }}>
-                👤
+              <span className="flex items-center justify-center w-full h-full select-none text-5xl font-semibold text-brand">
+                {(form?.name || user?.name || "U").charAt(0).toUpperCase()}
               </span>
             )}
-            <div className="absolute inset-0 flex items-end justify-center pb-2 pointer-events-none text-sm text-white opacity-0 group-hover:opacity-100">
-              📷 Change
+            <div className="absolute inset-0 flex items-end justify-center pb-3 pointer-events-none text-xs font-medium text-white bg-black/30 opacity-0 group-hover:opacity-100 transition">
+              Change photo
             </div>
           </div>
           <input
@@ -321,43 +323,82 @@ export default function Profile() {
 
       {/* Password Modal */}
       {showPasswordModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4" style={{ color: "#974D07" }}>Change Password</h2>
-            <form onSubmit={handlePasswordUpdate} className="space-y-3">
-              <input
-                name="oldPassword"
-                placeholder="Current password"
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[60]"
+          onClick={() => setShowPasswordModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="change-password-title"
+          >
+            <div className="flex items-start justify-between p-6 border-b border-line">
+              <div className="flex items-center gap-3">
+                <span className="w-10 h-10 rounded-full bg-sand text-brand flex items-center justify-center">
+                  <KeyRound size={18} />
+                </span>
+                <div>
+                  <h2 id="change-password-title" className="text-xl font-bold text-brand-deep">Change Password</h2>
+                  <p className="text-sm text-gray-500">Use at least 6 characters.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPasswordModal(false)}
+                className="text-gray-400 hover:text-gray-700"
+                aria-label="Close"
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            <form onSubmit={handlePasswordUpdate} className="p-6 space-y-4">
+              <AuthField
+                label="Current password"
+                icon={Lock}
                 type="password"
+                name="oldPassword"
                 value={passwordData.oldPassword}
                 onChange={handlePasswordChange}
-                className="w-full border rounded-lg px-3 py-2"
+                autoComplete="current-password"
                 required
               />
-              <input
-                name="newPassword"
-                placeholder="New password"
+              <AuthField
+                label="New password"
+                icon={Lock}
                 type="password"
+                name="newPassword"
                 value={passwordData.newPassword}
                 onChange={handlePasswordChange}
-                className="w-full border rounded-lg px-3 py-2"
+                autoComplete="new-password"
                 required
               />
-              <input
-                name="confirmPassword"
-                placeholder="Confirm new password"
+              <AuthField
+                label="Confirm new password"
+                icon={Lock}
                 type="password"
+                name="confirmPassword"
                 value={passwordData.confirmPassword}
                 onChange={handlePasswordChange}
-                className="w-full border rounded-lg px-3 py-2"
+                autoComplete="new-password"
                 required
               />
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setShowPasswordModal(false)} className="flex-1 border rounded-lg px-3 py-2">
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordModal(false)}
+                  className="flex-1 border border-line rounded-xl py-3 font-medium text-gray-700 hover:bg-sand transition"
+                >
                   Cancel
                 </button>
-                <button type="submit" disabled={passwordLoading} className="flex-1 text-white rounded-lg px-3 py-2" style={{ backgroundColor: "#974D07" }}>
-                  {passwordLoading ? "Saving..." : "Save"}
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="flex-1 bg-brand hover:bg-brand-hover text-white rounded-xl py-3 font-semibold transition disabled:opacity-60"
+                >
+                  {passwordLoading ? "Saving..." : "Update Password"}
                 </button>
               </div>
             </form>
