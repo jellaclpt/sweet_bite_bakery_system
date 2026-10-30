@@ -8,7 +8,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] text-center px-6 bg-cream">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] text-center px-6 bg-cream">
       {/* Hero section */}
       <div className="max-w-2xl flex flex-col items-center">
         <img src={logo} alt="" className="w-20 h-20 mb-6" />

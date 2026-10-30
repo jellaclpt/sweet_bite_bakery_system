@@ -44,7 +44,7 @@ export default function Products() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cream px-6 py-8">
+      <div className="min-h-screen bg-cream px-6 pt-6 pb-10">
         <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="bg-white rounded-2xl p-4 shadow-sm border border-line animate-pulse">
@@ -59,7 +59,7 @@ export default function Products() {
   }
 
   return (
-    <div className="min-h-screen bg-cream px-6 py-8">
+    <div className="min-h-screen bg-cream px-6 pt-6 pb-10">
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-brand">Our Products</h1>

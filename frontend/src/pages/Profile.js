@@ -237,7 +237,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen py-8 px-4 bg-cream">
+    <div className="min-h-screen pt-6 pb-8 px-4 bg-cream">
       <div className="bg-white shadow-sm border border-line rounded-2xl p-6 sm:p-8 w-full max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-center text-brand">My Profile</h1>
 

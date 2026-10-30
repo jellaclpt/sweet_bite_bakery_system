@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
-import logo from "../assets/logo.png";
-import cakesBg from "../assets/cakes-bg.jpg";
+import { Mail, Lock } from "lucide-react";
+import AuthLayout, { AuthField } from "../components/AuthLayout";
 
 export default function Login() {
   const { login } = useAuth();
@@ -27,7 +27,7 @@ export default function Login() {
       const loggedInUser = await login(form.email, form.password);
 
       console.log("✅ Login successful. User:", loggedInUser);
-      toast.success(`Welcome back, ${loggedInUser.name}! 🎉`);
+      toast.success(`Welcome back, ${loggedInUser.name}!`);
 
       // Role-based redirect
       if (loggedInUser.role === "admin") {
@@ -56,81 +56,64 @@ export default function Login() {
       }
 
       setError(message);
-      toast.error("Login failed ❌");
+      toast.error("Login failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${cakesBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-        <img src={logo} alt="Sweet Bite Logo" className="w-16 h-16 mx-auto mb-4" />
-        <h1 className="text-3xl font-bold text-center mb-6" style={{ color: "#974D07" }}>
-           Sweet Bite
-        </h1>
-
-        {error && (
-          <p className="text-red-500 text-sm mb-3 text-center">
-            {error}
-          </p>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm text-gray-600">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              autoFocus
-              className="w-full border rounded-lg px-3 py-2 mt-1 focus:ring-2 outline-none"
-              style={{ '--tw-ring-color': '#974D07' }}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-600">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg px-3 py-2 mt-1 focus:ring-2 outline-none"
-              style={{ '--tw-ring-color': '#974D07' }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full text-white py-2 rounded-lg transition"
-            style={{ backgroundColor: "#974D07" }}
-            onMouseEnter={(e) => e.target.style.opacity = "0.9"}
-            onMouseLeave={(e) => e.target.style.opacity = "1"}
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
-
-        <p className="text-sm text-gray-500 text-center mt-4">
+    <AuthLayout
+      title="Welcome back"
+      subtitle="Log in to order your favorite treats."
+      footer={
+        <>
           Don’t have an account?{" "}
-          <Link to="/register" className="hover:underline" style={{ color: "#974D07" }}>
-            Register
+          <Link to="/register" className="font-semibold text-brand hover:underline">
+            Create one
           </Link>
+        </>
+      }
+    >
+      {error && (
+        <p className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
         </p>
-      </div>
-    </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <AuthField
+          label="Email"
+          icon={Mail}
+          type="email"
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+          placeholder="you@example.com"
+          autoComplete="email"
+          required
+          autoFocus
+        />
+        <AuthField
+          label="Password"
+          icon={Lock}
+          type="password"
+          name="password"
+          value={form.password}
+          onChange={handleChange}
+          placeholder="Enter your password"
+          autoComplete="current-password"
+          required
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-brand hover:bg-brand-hover text-white font-semibold py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {loading ? "Logging in..." : "Log in"}
+        </button>
+      </form>
+    </AuthLayout>
   );
 }

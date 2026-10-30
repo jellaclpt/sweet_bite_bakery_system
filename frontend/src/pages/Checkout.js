@@ -79,7 +79,7 @@ export default function Checkout() {
     "w-full border border-line rounded-xl px-3 py-2.5 bg-white outline-none text-gray-700 focus:ring-2 focus:ring-brand/40 focus:border-brand";
 
   return (
-    <div className="min-h-screen bg-cream px-6 py-8">
+    <div className="min-h-screen bg-cream px-6 pt-6 pb-10">
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-brand">Checkout</h1>
@@ -171,7 +171,7 @@ export default function Checkout() {
           </section>
 
           {/* Order details */}
-          <section className="bg-white rounded-2xl border border-line shadow-sm p-6 lg:sticky lg:top-28">
+          <section className="bg-white rounded-2xl border border-line shadow-sm p-6 lg:sticky lg:top-24">
             <h2 className="text-lg font-semibold text-gray-800 mb-5">Order Details</h2>
 
             <div className="mb-5">

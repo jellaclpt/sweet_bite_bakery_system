@@ -4,8 +4,8 @@ import api from "../api/api";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
-import logo from "../assets/logo.png";
-import cakesBg from "../assets/cakes-bg.jpg";
+import { User, Phone, MapPin, Mail, Lock } from "lucide-react";
+import AuthLayout, { AuthField } from "../components/AuthLayout";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -39,138 +39,68 @@ export default function Register() {
       // (Assuming your login endpoint accepts email + password)
       await login(form.email, form.password);
 
-      toast.success("Account created — welcome! 🎉");
+      toast.success("Account created. Welcome to Sweet Bite!");
       navigate("/"); // go to Home
     } catch (err) {
       console.error("Registration failed:", err);
 
       // Handle Laravel validation errors or message
+      // Show Laravel validation errors as readable sentences instead of raw JSON
+      const fieldErrors = err?.response?.data?.errors;
       const backendMsg =
+        (fieldErrors && typeof fieldErrors === "object" && Object.values(fieldErrors).flat().join(" ")) ||
         err?.response?.data?.message ||
-        (err?.response?.data?.errors && JSON.stringify(err.response.data.errors)) ||
         err?.message ||
         "Registration failed";
 
       setError(backendMsg);
-      toast.error("Registration failed ❌");
+      toast.error("Registration failed");
     } finally {
       setLoading(false);
     }
   };
 
+  const field = (name) => ({ name, value: form[name], onChange: handleChange, required: true });
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-cover bg-center"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${cakesBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}>
-      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-        <img src={logo} alt="Sweet Bite Logo" className="w-16 h-16 mx-auto mb-4" />
-        <h1 className="text-3xl font-bold text-center text-brand">Create an Account</h1>
-        <p className="text-sm text-gray-500 text-center mt-1 mb-6">Join Sweet Bite to pre-order your favorites.</p>
-
-        {error && <p className="text-red-500 text-sm mb-3 text-center">{error}</p>}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm text-gray-600">Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg px-3 py-2 mt-1 focus:ring-2 outline-none"
-              style={{ '--tw-ring-color': '#974D07' }}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-600">Phone Number</label>
-            <input
-              type="text"
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg px-3 py-2 mt-1 focus:ring-2 outline-none"
-              style={{ '--tw-ring-color': '#974D07' }}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-600">Address</label>
-            <input
-              type="text"
-              name="address"
-              value={form.address}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg px-3 py-2 mt-1 focus:ring-2 outline-none"
-              style={{ '--tw-ring-color': '#974D07' }}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-600">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg px-3 py-2 mt-1 focus:ring-2 outline-none"
-              style={{ '--tw-ring-color': '#974D07' }}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-600">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg px-3 py-2 mt-1 focus:ring-2 outline-none"
-              style={{ '--tw-ring-color': '#974D07' }}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-600">Confirm Password</label>
-            <input
-              type="password"
-              name="password_confirmation"
-              value={form.password_confirmation}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg px-3 py-2 mt-1 focus:ring-2 outline-none"
-              style={{ '--tw-ring-color': '#974D07' }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full text-white py-2 rounded-lg transition"
-            style={{ backgroundColor: "#974D07" }}
-            onMouseEnter={(e) => e.target.style.opacity = "0.9"}
-            onMouseLeave={(e) => e.target.style.opacity = "1"}
-          >
-            {loading ? "Registering..." : "Create Account"}
-          </button>
-        </form>
-
-        <p className="text-sm text-gray-500 text-center mt-4">
+    <AuthLayout
+      title="Create an account"
+      subtitle="Join Sweet Bite to pre-order your favorites."
+      footer={
+        <>
           Already have an account?{" "}
-          <Link to="/login" className="hover:underline" style={{ color: "#974D07" }}>
-            Login
+          <Link to="/login" className="font-semibold text-brand hover:underline">
+            Log in
           </Link>
+        </>
+      }
+    >
+      {error && (
+        <p className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
         </p>
-      </div>
-    </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <AuthField label="Full Name" icon={User} placeholder="Juan Dela Cruz" autoComplete="name" {...field("name")} />
+          <AuthField label="Phone Number" icon={Phone} type="tel" placeholder="09XX XXX XXXX" autoComplete="tel" {...field("phone")} />
+        </div>
+        <AuthField label="Address" icon={MapPin} placeholder="Street, barangay, town" autoComplete="street-address" {...field("address")} />
+        <AuthField label="Email" icon={Mail} type="email" placeholder="you@example.com" autoComplete="email" {...field("email")} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <AuthField label="Password" icon={Lock} type="password" placeholder="Password" autoComplete="new-password" {...field("password")} />
+          <AuthField label="Confirm Password" icon={Lock} type="password" placeholder="Repeat it" autoComplete="new-password" {...field("password_confirmation")} />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-brand hover:bg-brand-hover text-white font-semibold py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed !mt-6"
+        >
+          {loading ? "Creating account..." : "Create Account"}
+        </button>
+      </form>
+    </AuthLayout>
   );
 }

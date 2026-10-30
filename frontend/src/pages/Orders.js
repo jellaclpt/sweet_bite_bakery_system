@@ -36,7 +36,7 @@ export default function Orders() {
   }
 
   return (
-    <div className="min-h-screen bg-cream px-6 py-8">
+    <div className="min-h-screen bg-cream px-6 pt-6 pb-10">
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-brand">Your Orders</h1>

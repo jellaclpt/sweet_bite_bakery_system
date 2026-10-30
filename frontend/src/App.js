@@ -105,7 +105,7 @@ function AppContent() {
 
       {/* Reserve room for the fixed navbar (top on desktop, bottom bar on mobile)
           so page titles are never hidden underneath it */}
-      <main className={showCustomerNavbar ? "pt-6 md:pt-24 pb-24 md:pb-0" : ""}>
+      <main className={showCustomerNavbar ? "md:pt-16 pb-20 md:pb-0" : ""}>
       <Routes>
         {/* Public routes */}
         <Route element={<PublicRoute />}>
