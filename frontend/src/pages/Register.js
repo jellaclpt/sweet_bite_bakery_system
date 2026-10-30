@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { User, Phone, MapPin, Mail, Lock } from "lucide-react";
 import AuthLayout, { AuthField } from "../components/AuthLayout";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -101,6 +102,8 @@ export default function Register() {
           {loading ? "Creating account..." : "Create Account"}
         </button>
       </form>
+
+      <GoogleSignInButton mode="signup" />
     </AuthLayout>
   );
 }

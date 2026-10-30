@@ -34,3 +34,21 @@ export const orderStatusClass = (status) => {
       return "bg-sand text-brand-deep";
   }
 };
+
+// Pre-order payment statuses (deposit flow)
+const PAYMENT_STATUS = {
+  awaiting_deposit: { label: "Deposit needed", className: "bg-amber-100 text-amber-800" },
+  deposit_submitted: { label: "Checking payment", className: "bg-blue-100 text-blue-700" },
+  deposit_paid: { label: "Deposit paid", className: "bg-green-100 text-green-700" },
+  paid: { label: "Fully paid", className: "bg-green-600 text-white" },
+  unpaid: { label: "Unpaid", className: "bg-gray-100 text-gray-600" },
+};
+
+export const formatPaymentStatus = (value) =>
+  PAYMENT_STATUS[value]?.label || formatLabel(value);
+
+export const paymentStatusClass = (value) =>
+  PAYMENT_STATUS[value]?.className || "bg-gray-100 text-gray-600";
+
+export const peso = (value) =>
+  `₱${Number(value || 0).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { Mail, Lock } from "lucide-react";
 import AuthLayout, { AuthField } from "../components/AuthLayout";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 
 export default function Login() {
   const { login } = useAuth();
@@ -114,6 +115,8 @@ export default function Login() {
           {loading ? "Logging in..." : "Log in"}
         </button>
       </form>
+
+      <GoogleSignInButton mode="signin" />
     </AuthLayout>
   );
 }

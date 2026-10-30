@@ -10,6 +10,8 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DepositController;
+use App\Http\Controllers\AdminOrderController;
 
 // Pickup/Deliveries
 Route::get('/orders/scheduled', [OrderController::class, 'scheduled']);
@@ -30,9 +32,16 @@ Route::middleware([ForceJsonResponse::class])->group(function () {
 
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/auth/google', [AuthController::class, 'google']);
+
+    // Where and how much to pay for a pre-order deposit
+    Route::get('/payment-settings', [DepositController::class, 'settings']);
 
     Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\AdminController::class, 'dashboard']);
+        Route::get('/orders', [AdminOrderController::class, 'index']);
+        Route::patch('/orders/{id}/payment', [AdminOrderController::class, 'updatePayment']);
+        Route::patch('/orders/{id}/status', [AdminOrderController::class, 'updateStatus']);
     });
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -42,6 +51,11 @@ Route::middleware([ForceJsonResponse::class])->group(function () {
 
         Route::post('/logout', [AuthController::class, 'logout']);
     });
+});
+
+// Deposit proof upload (multipart) - outside ForceJsonResponse, like product uploads
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/orders/{id}/deposit', [DepositController::class, 'submit']);
 });
 
 // Profile routes - OUTSIDE the ForceJsonResponse middleware

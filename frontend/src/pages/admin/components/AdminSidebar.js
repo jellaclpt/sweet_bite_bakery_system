@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { FiGrid, FiPlusSquare, FiLogOut } from "react-icons/fi";
+import { FiGrid, FiPlusSquare, FiClipboard, FiLogOut } from "react-icons/fi";
 import { useAuth } from "../../../context/AuthContext";
 import { useSidebar } from "../../../context/SidebarContext";
 import { useGooeyEffect } from "../../../components/GooeyNav";
@@ -14,6 +14,7 @@ export default function AdminSidebar() {
   // Gooey effect for selected admin menu items (Dashboard, Products)
   const dashboardRef = useRef(null);
   const productsRef = useRef(null);
+  const ordersRef = useRef(null);
   const {
     containerRef,
     filterRef,
@@ -80,6 +81,18 @@ export default function AdminSidebar() {
               onClick={() => handleClickGooey(productsRef, "Products")}
             >
               <FiPlusSquare className="text-lg" /> <span>Add Product</span>
+            </Link>
+
+            <Link
+              ref={ordersRef}
+              to="/admin/orders"
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition ${isActive(
+                "/admin/orders"
+              )}`}
+              onMouseEnter={() => handleHover(ordersRef, "Orders")}
+              onClick={() => handleClickGooey(ordersRef, "Orders")}
+            >
+              <FiClipboard className="text-lg" /> <span>Orders</span>
             </Link>
           </nav>
         </div>

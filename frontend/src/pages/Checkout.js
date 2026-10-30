@@ -1,5 +1,5 @@
 // src/pages/Checkout.js
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import api from "../api/api";
@@ -7,7 +7,8 @@ import dayjs from "dayjs";
 import toast from "react-hot-toast";
 import ReactDatePicker from "react-datepicker";
 import { getImageUrl } from "../utils/imageUrl";
-import { Minus, Plus, X, Trash2, ShoppingBag, Store, Truck } from "lucide-react";
+import { Minus, Plus, X, Trash2, ShoppingBag, Store, Truck, Smartphone, Banknote } from "lucide-react";
+import { peso } from "../utils/labels";
 import "react-datepicker/dist/react-datepicker.css";
 
 export default function Checkout() {
@@ -15,11 +16,23 @@ export default function Checkout() {
   const navigate = useNavigate();
   const [fulfillment, setFulfillment] = useState("pickup");
   const [pickupTime, setPickupTime] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState("gcash");
+  // How the customer will pay the balance; the deposit itself always goes through GCash
+  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [settings, setSettings] = useState({ deposit_percent: 50 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const total = subtotal();
+  const depositPercent = Number(settings.deposit_percent ?? 50);
+  const deposit = Math.round(total * depositPercent) / 100;
+  const balance = total - deposit;
+
+  useEffect(() => {
+    api
+      .get("/payment-settings")
+      .then((res) => setSettings(res.data))
+      .catch(() => {});
+  }, []);
 
   async function placeOrder() {
     setError(null);
@@ -29,8 +42,8 @@ export default function Checkout() {
       return;
     }
 
-    if (fulfillment === "pickup" && !pickupTime) {
-      setError("Please choose pickup date and time.");
+    if (!pickupTime) {
+      setError(`Please choose a ${fulfillment} date and time.`);
       return;
     }
 
@@ -64,9 +77,11 @@ export default function Checkout() {
       console.log("✅ Order response:", res.data);
 
       clearCart();
-      toast.success("Order placed successfully!");
+      toast.success("Pre-order placed! Pay the deposit to confirm it.");
 
-      setTimeout(() => navigate("/orders"), 800);
+      // Open the deposit payment step for the new order right away
+      const newId = res.data?.order?.id;
+      navigate(newId ? `/orders?pay=${newId}` : "/orders");
     } catch (err) {
       console.error("❌ Order failed:", err);
       setError(err.response?.data?.message || "Failed to place order.");
@@ -215,23 +230,47 @@ export default function Checkout() {
               />
             </div>
 
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className={fieldClass}
-              >
-                <option value="gcash">GCash</option>
-                <option value="card">Card</option>
-                <option value="paypal">PayPal</option>
-                <option value="cod">Cash on Pickup or Delivery</option>
-              </select>
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Pay the balance on {fulfillment === "pickup" ? "pickup" : "delivery"} with
+              </label>
+              <div className="grid grid-cols-2 gap-2 p-1 bg-sand rounded-xl">
+                {[
+                  { value: "cash", label: "Cash", icon: <Banknote size={16} /> },
+                  { value: "gcash", label: "GCash", icon: <Smartphone size={16} /> },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                      paymentMethod === opt.value ? "bg-white text-brand shadow-sm" : "text-gray-600 hover:text-brand"
+                    }`}
+                    onClick={() => setPaymentMethod(opt.value)}
+                  >
+                    {opt.icon}
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="flex justify-between items-center border-t border-line pt-4 mb-4">
-              <span className="text-gray-600">Subtotal</span>
-              <span className="text-xl font-bold text-brand">₱{Number(total).toFixed(2)}</span>
+            {/* Payment breakdown: deposit now, balance later */}
+            <div className="border-t border-line pt-4 mb-4 space-y-2 text-sm">
+              <div className="flex justify-between text-gray-600">
+                <span>Subtotal</span>
+                <span className="font-medium text-gray-800">{peso(total)}</span>
+              </div>
+              <div className="flex justify-between items-start rounded-xl bg-sand px-3 py-2.5">
+                <span>
+                  <span className="block font-semibold text-brand-deep">Deposit due now ({depositPercent}%)</span>
+                  <span className="text-xs text-brand-deep/70">Sent via GCash after you place the order</span>
+                </span>
+                <span className="text-lg font-bold text-brand">{peso(deposit)}</span>
+              </div>
+              <div className="flex justify-between text-gray-600 px-3">
+                <span>Balance on {fulfillment === "pickup" ? "pickup" : "delivery"}</span>
+                <span className="font-medium text-gray-800">{peso(balance)}</span>
+              </div>
             </div>
 
             <button
@@ -239,8 +278,11 @@ export default function Checkout() {
               disabled={loading || items.length === 0}
               className="w-full bg-brand hover:bg-brand-hover text-white font-semibold py-3 rounded-full transition disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
             >
-              {loading ? "Placing Order..." : "Place Order"}
+              {loading ? "Placing Pre-order..." : "Place Pre-order"}
             </button>
+            <p className="text-xs text-gray-400 text-center mt-2">
+              Your order is confirmed once we receive the deposit.
+            </p>
 
             {error && <p className="text-red-600 mt-3 text-sm text-center">{error}</p>}
           </section>

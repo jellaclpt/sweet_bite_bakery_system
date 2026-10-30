@@ -39,7 +39,7 @@ export default function Navbar() {
         setOrderCount(orders.length);
       })
       .catch((err) => console.error("Error fetching orders:", err));
-  }, [user]);
+  }, [user, location.pathname]);
 
   // 🚪 Logout handler
   const handleLogout = async () => {
