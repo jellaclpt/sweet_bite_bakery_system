@@ -36,8 +36,8 @@ export default function Orders() {
   }
 
   return (
-    <div className="min-h-screen bg-cream px-6 pt-6 pb-10">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-cream px-6 lg:px-10 pt-6 pb-10">
+      <div className="max-w-screen-2xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-brand">Your Orders</h1>
           <p className="text-gray-500 mt-1">Track your pre-orders and pickup or delivery times.</p>
@@ -54,7 +54,7 @@ export default function Orders() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
             {orders.map((order) => (
               <div
                 key={order.id}

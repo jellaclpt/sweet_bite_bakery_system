@@ -79,8 +79,8 @@ export default function Checkout() {
     "w-full border border-line rounded-xl px-3 py-2.5 bg-white outline-none text-gray-700 focus:ring-2 focus:ring-brand/40 focus:border-brand";
 
   return (
-    <div className="min-h-screen bg-cream px-6 pt-6 pb-10">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-cream px-6 lg:px-10 pt-6 pb-10">
+      <div className="max-w-screen-2xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-brand">Checkout</h1>
           <p className="text-gray-500 mt-1">Review your cart and choose how you want to get your order.</p>

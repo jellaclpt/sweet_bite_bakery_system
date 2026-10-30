@@ -44,8 +44,8 @@ export default function Products() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cream px-6 pt-6 pb-10">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="min-h-screen bg-cream px-6 lg:px-10 pt-6 pb-10">
+        <div className="max-w-screen-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="bg-white rounded-2xl p-4 shadow-sm border border-line animate-pulse">
               <div className="w-full h-40 rounded-xl mb-4 bg-sand"></div>
@@ -59,8 +59,8 @@ export default function Products() {
   }
 
   return (
-    <div className="min-h-screen bg-cream px-6 pt-6 pb-10">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-cream px-6 lg:px-10 pt-6 pb-10">
+      <div className="max-w-screen-2xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-brand">Our Products</h1>
           <p className="text-gray-500 mt-1">
@@ -68,7 +68,7 @@ export default function Products() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {products.length > 0 ? (
             products.map((product) => {
               const unavailable = !product.is_available || product.is_available === 0;
@@ -106,12 +106,12 @@ export default function Products() {
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between mt-4 gap-3">
+                  <div className="flex items-center justify-between mt-4 gap-2">
                     <div className="flex items-center rounded-full border border-line">
                       <button
                         type="button"
                         aria-label="Decrease quantity"
-                        className="w-9 h-9 flex items-center justify-center text-gray-600 hover:text-brand disabled:opacity-40"
+                        className="w-8 h-9 flex items-center justify-center text-gray-600 hover:text-brand disabled:opacity-40"
                         onClick={() => handleQuantityChange(product.id, -1)}
                         disabled={unavailable || qty <= 1}
                       >
@@ -121,7 +121,7 @@ export default function Products() {
                       <button
                         type="button"
                         aria-label="Increase quantity"
-                        className="w-9 h-9 flex items-center justify-center text-gray-600 hover:text-brand disabled:opacity-40"
+                        className="w-8 h-9 flex items-center justify-center text-gray-600 hover:text-brand disabled:opacity-40"
                         onClick={() => handleQuantityChange(product.id, +1)}
                         disabled={unavailable}
                       >
@@ -131,7 +131,7 @@ export default function Products() {
 
                     <button
                       type="button"
-                      className="flex-1 bg-brand hover:bg-brand-hover text-white text-sm font-semibold px-4 py-2.5 rounded-full transition disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
+                      className="flex-1 whitespace-nowrap bg-brand hover:bg-brand-hover text-white text-sm font-semibold px-3 py-2.5 rounded-full transition disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
                       onClick={() => handleAddToCart(product)}
                       disabled={unavailable}
                     >
