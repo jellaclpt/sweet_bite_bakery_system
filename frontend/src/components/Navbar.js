@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import GooeyNav from "./GooeyNav";
 import {
   Home,
+  Store,
   ShoppingCart,
   ClipboardList,
   LogOut,
@@ -53,7 +54,7 @@ export default function Navbar() {
   // 🧭 Navigation links (centered Gooey)
   const navItems = [
     { label: "Home", href: "/", icon: <Home size={20} /> },
-    { label: "Products", href: "/products", icon: <ShoppingCart size={20} /> },
+    { label: "Products", href: "/products", icon: <Store size={20} /> },
     {
       label: `Checkout (${cartCount})`,
       href: "/checkout",
@@ -75,8 +76,8 @@ export default function Navbar() {
           className="flex items-center gap-2 cursor-pointer"
           onClick={() => navigate("/")}
         >
-          <img src={logo} alt="Sweet Bite Logo" className="w-12 h-12 mx-auto mb-2" />
-          <span className="text-xl font-bold" style={{ color: "#974D07" }}>Sweet Bites</span>
+          <img src={logo} alt="Sweet Bite Logo" className="w-10 h-10" />
+          <span className="text-xl font-bold text-brand">Sweet Bite</span>
         </div>
 
         {/* Center: Gooey Navigation */}
@@ -125,12 +126,9 @@ export default function Navbar() {
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1 text-white px-3 py-1 rounded-full transition"
-            style={{ backgroundColor: "#974D07" }}
-            onMouseEnter={(e) => e.target.style.opacity = "0.9"}
-            onMouseLeave={(e) => e.target.style.opacity = "1"}
+            className="flex items-center gap-1.5 text-sm font-medium text-white bg-brand hover:bg-brand-hover px-4 py-2 rounded-full transition"
           >
-            <LogOut size={18} />
+            <LogOut size={16} />
             Logout
           </button>
         </div>

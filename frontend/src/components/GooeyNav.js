@@ -162,8 +162,12 @@ const GooeyNav = ({
   // ✅ Keep highlight synced with current route
   useEffect(() => {
     const currentIndex = items.findIndex((item) => item.href === location.pathname);
+    // Pages outside the nav (e.g. Profile) highlight nothing instead of keeping the last tab
+    setActiveIndex(currentIndex);
+    [filterRef.current, textRef.current].forEach((el) => {
+      if (el) el.style.opacity = currentIndex === -1 ? "0" : "";
+    });
     if (currentIndex !== -1) {
-      setActiveIndex(currentIndex);
       const li = navRef.current?.querySelectorAll("li")[currentIndex];
       if (li) moveToElement(li, items[currentIndex]?.label);
     }
@@ -179,7 +183,7 @@ const GooeyNav = ({
   };
 
   useEffect(() => {
-    if (!navRef.current || !containerRef.current) return;
+    if (!navRef.current || !containerRef.current || activeIndex === -1) return;
     const activeLi = navRef.current.querySelectorAll("li")[activeIndex];
     if (activeLi) {
       moveToElement(activeLi, items[activeIndex]?.label);
@@ -207,8 +211,8 @@ const GooeyNav = ({
                 style={{
                   color: activeIndex === index ? "#974D07" : "inherit",
                 }}
-                onMouseEnter={(e) => !activeIndex === index && (e.currentTarget.style.backgroundColor = "#f0e6dd", e.currentTarget.style.color = "#974D07")}
-                onMouseLeave={(e) => !activeIndex === index && (e.currentTarget.style.backgroundColor = "transparent", e.currentTarget.style.color = "inherit")}
+                onMouseEnter={(e) => activeIndex !== index && (e.currentTarget.style.backgroundColor = "#f0e6dd", e.currentTarget.style.color = "#974D07")}
+                onMouseLeave={(e) => activeIndex !== index && (e.currentTarget.style.backgroundColor = "transparent", e.currentTarget.style.color = "inherit")}
               >
                 {item.icon && <span>{item.icon}</span>}
                 <span>{item.label}</span>

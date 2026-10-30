@@ -67,9 +67,9 @@ export default function Register() {
         backgroundRepeat: "no-repeat",
       }}>
       <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center mb-6" style={{ color: "#974D07" }}>
-          <img src={logo} alt="Sweet Bite Logo" className="w-16 h-16 mx-auto mb-4" /> Create an Account
-        </h1>
+        <img src={logo} alt="Sweet Bite Logo" className="w-16 h-16 mx-auto mb-4" />
+        <h1 className="text-3xl font-bold text-center text-brand">Create an Account</h1>
+        <p className="text-sm text-gray-500 text-center mt-1 mb-6">Join Sweet Bite to pre-order your favorites.</p>
 
         {error && <p className="text-red-500 text-sm mb-3 text-center">{error}</p>}
 

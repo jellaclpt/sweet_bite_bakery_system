@@ -2,7 +2,9 @@
 import React, { useEffect, useState } from "react";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 import { getImageUrl } from "../utils/imageUrl";
+import { formatLabel, formatPaymentMethod, orderStatusClass } from "../utils/labels";
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -26,119 +28,106 @@ export default function Orders() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen" style={{ background: "linear-gradient(to bottom, #fff8f0, #f0e6dd)" }}>
-        <div className="text-5xl animate-bounce">🧁</div>
-        <p className="mt-3 font-semibold animate-pulse" style={{ color: "#974D07" }}>
-          Loading your orders...
-        </p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] bg-cream">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand"></div>
+        <p className="mt-4 font-medium text-brand">Loading your orders...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-10 px-6 flex flex-col items-center pt-20" style={{ backgroundColor: "#fff8f0" }}>
-      <h1 className="text-3xl font-bold text-center mb-8" style={{ color: "#974D07" }}>
-        🧁 Your Orders
-      </h1>
+    <div className="min-h-screen bg-cream px-6 py-8">
+      <div className="max-w-6xl mx-auto">
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold text-brand">Your Orders</h1>
+          <p className="text-gray-500 mt-1">Track your pre-orders and pickup or delivery times.</p>
+        </header>
 
-      {orders.length === 0 ? (
-        <p className="text-gray-500 text-center">
-          No orders yet. Go grab a treat!
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
-          {orders.map((order) => (
-            <div
-              key={order.id}
-              className="bg-white shadow-lg rounded-2xl p-6 border hover:shadow-lg transition"
-              style={{ borderColor: "#e8ddd2" }}
+        {orders.length === 0 ? (
+          <div className="bg-white border border-line rounded-2xl p-10 text-center">
+            <p className="text-gray-600 mb-4">No orders yet. Go grab a treat!</p>
+            <Link
+              to="/products"
+              className="inline-block bg-brand hover:bg-brand-hover text-white text-sm font-semibold px-5 py-2.5 rounded-full transition"
             >
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="font-semibold text-lg text-gray-700">
-                  Order #{order.id}
-                </h2>
-                <span
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    order.status === "completed"
-                      ? "bg-green-100 text-green-600"
-                      : order.status === "processing"
-                      ? "bg-yellow-100 text-yellow-600"
-                      : order.status === "cancelled"
-                      ? "bg-red-100 text-red-600"
-                      : "bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  {order.status}
-                </span>
-              </div>
+              Browse Products
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {orders.map((order) => (
+              <div
+                key={order.id}
+                className="bg-white rounded-2xl border border-line shadow-sm p-6 flex flex-col"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="font-semibold text-lg text-gray-800">Order #{order.id}</h2>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${orderStatusClass(order.status)}`}>
+                    {formatLabel(order.status)}
+                  </span>
+                </div>
 
-              <p className="text-sm text-gray-500 mb-1">
-                Payment:{" "}
-                <span
-                  className={`font-medium ${
-                    order.payment_status === "paid"
-                      ? "text-green-600"
-                      : "text-red-500"
-                  }`}
-                >
-                  {order.payment_status}
-                </span>
-              </p>
+                <dl className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm mb-4">
+                  <dt className="text-gray-500">Payment</dt>
+                  <dd
+                    className={`font-medium text-right ${
+                      order.payment_status === "paid" ? "text-green-600" : "text-amber-600"
+                    }`}
+                  >
+                    {formatLabel(order.payment_status)}
+                  </dd>
+                  <dt className="text-gray-500">Method</dt>
+                  <dd className="font-medium text-right text-gray-700">
+                    {formatPaymentMethod(order.payment_method)}
+                  </dd>
+                  <dt className="text-gray-500">Fulfillment</dt>
+                  <dd className="font-medium text-right text-gray-700">{formatLabel(order.fulfillment)}</dd>
+                </dl>
 
-              <p className="text-sm text-gray-500 mb-1">
-                Method:{" "}
-                <span className="font-medium">{order.payment_method}</span>
-              </p>
-
-              <p className="text-sm text-gray-500 mb-4">
-                Fulfillment:{" "}
-                <span className="font-medium">{order.fulfillment}</span>
-              </p>
-
-              {order.items?.length > 0 && (
-                <div className="border-t pt-3">
-                  <h3 className="font-semibold text-gray-700 mb-2">Items:</h3>
-                  {order.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center gap-3 mb-3"
-                    >
-                      {item.product_image && (
+                {order.items?.length > 0 && (
+                  <div className="border-t border-line pt-4 space-y-3 flex-1">
+                    {order.items.map((item) => (
+                      <div key={item.id} className="flex items-center gap-3">
                         <img
                           src={getImageUrl(item.product_image)}
                           alt={item.product_name}
-                          className="w-10 h-10 object-cover rounded"
+                          className="w-10 h-10 object-cover rounded-lg"
                         />
-                      )}
-                      <div className="flex-1">
-                        <div className="text-sm font-medium">
-                          {item.product_name} × {item.quantity}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-gray-800 truncate">
+                            {item.product_name}
+                          </div>
+                          <div className="text-xs text-gray-500">Qty {item.quantity}</div>
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-sm text-gray-700">
                           ₱{Number(item.total_price).toFixed(2)}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-4 pt-4 border-t border-line flex justify-between items-center">
+                  <span className="font-semibold text-gray-700">Total</span>
+                  <span className="font-bold text-lg text-brand">
+                    ₱{Number(order.total).toFixed(2)}
+                  </span>
                 </div>
-              )}
 
-              <div className="mt-3 flex justify-between items-center">
-                <strong className="text-gray-700">Total:</strong>
-                <span className="font-semibold text-lg" style={{ color: "#974D07" }}>
-                  ₱{Number(order.total).toFixed(2)}
-                </span>
+                {order.pickup_time && (
+                  <p className="mt-2 text-xs text-gray-400">
+                    {order.fulfillment === "delivery" ? "Delivery" : "Pickup"} time:{" "}
+                    {new Date(order.pickup_time).toLocaleString([], {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </p>
+                )}
               </div>
-
-              {order.pickup_time && (
-                <p className="mt-2 text-xs text-gray-400">
-                  Pickup Time: {new Date(order.pickup_time).toLocaleString()}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

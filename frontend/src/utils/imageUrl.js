@@ -1,5 +1,6 @@
 export const getImageUrl = (imagePath) => {
-  if (!imagePath) return '/placeholder.png';
+  // Fall back to the bakery logo, which ships with the app (the old /placeholder.png did not exist)
+  if (!imagePath) return `${process.env.PUBLIC_URL || ''}/logo192.png`;
 
   // If it's already a full URL, return it unchanged
   if (imagePath.startsWith('http')) return imagePath;

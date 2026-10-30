@@ -35,7 +35,7 @@ export default function Profile() {
         address: user.address || "",
         image: null,
       });
-      setPreview(getImageUrl(user.image_url) || null);
+      setPreview(user.image_url ? getImageUrl(user.image_url) : null);
       return;
     }
 
@@ -54,7 +54,7 @@ export default function Profile() {
           address: u.address || "",
           image: null,
         });
-        setPreview(getImageUrl(u.image_url) || null);
+        setPreview(u.image_url ? getImageUrl(u.image_url) : null);
       } catch (err) {
         console.warn("Could not fetch user:", err?.response?.data || err);
       }
@@ -237,25 +237,25 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen py-20 px-4" style={{ backgroundColor: "#fff8f0" }}>
-      <div className="bg-white shadow-lg rounded-2xl p-6 sm:p-8 w-full max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 text-center" style={{ color: "#974D07" }}>My Profile</h1>
+    <div className="min-h-screen py-8 px-4 bg-cream">
+      <div className="bg-white shadow-sm border border-line rounded-2xl p-6 sm:p-8 w-full max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold mb-6 text-center text-brand">My Profile</h1>
 
         <div className="flex justify-center mb-6">
           <div
             onClick={handleImageClick}
-            className="relative w-32 h-32 rounded-full flex items-center justify-center cursor-pointer overflow-hidden border-4"
+            className="group relative w-32 h-32 rounded-full flex items-center justify-center cursor-pointer overflow-hidden border-4"
             style={{ backgroundColor: "#f0e6dd", borderColor: "#e8ddd2" }}
           >
             {preview ? (
-              <img src={preview} className="w-full h-full object-cover" alt="👤" />
+              <img src={preview} className="w-full h-full object-cover" alt="Profile" />
             ) : (
-              <span className="text-6xl flex items-center justify-center w-full h-full select-none" style={{ color: "#d4a574" }}>
-                👤
+              <span className="flex items-center justify-center w-full h-full select-none text-5xl font-semibold text-brand">
+                {(form?.name || user?.name || "U").charAt(0).toUpperCase()}
               </span>
             )}
-            <div className="absolute inset-0 flex items-end justify-center pb-2 pointer-events-none text-sm text-white opacity-0 group-hover:opacity-100">
-              📷 Change
+            <div className="absolute inset-0 flex items-end justify-center pb-3 pointer-events-none text-xs font-medium text-white bg-black/30 opacity-0 group-hover:opacity-100 transition">
+              Change photo
             </div>
           </div>
           <input

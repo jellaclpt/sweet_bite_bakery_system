@@ -26,9 +26,9 @@ import { SidebarProvider } from "./context/SidebarContext";
 // Loading screen component
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-pink-50 flex items-center justify-center">
+    <div className="min-h-screen bg-cream flex items-center justify-center">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B3611B] mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand mx-auto mb-4"></div>
         <p className="text-gray-600">Loading...</p>
       </div>
     </div>
@@ -78,7 +78,7 @@ export default function App() {
         position="top-center"
         toastOptions={{
           duration: 2500,
-          style: { background: "#f472b6", color: "#fff", borderRadius: "10px" },
+          style: { background: "#5A381E", color: "#fff", borderRadius: "10px", fontFamily: "Poppins, sans-serif" },
         }}
       />
     </SidebarProvider>
@@ -103,6 +103,9 @@ function AppContent() {
     <>
       {showCustomerNavbar && <Navbar />}
 
+      {/* Reserve room for the fixed navbar (top on desktop, bottom bar on mobile)
+          so page titles are never hidden underneath it */}
+      <main className={showCustomerNavbar ? "pt-6 md:pt-24 pb-24 md:pb-0" : ""}>
       <Routes>
         {/* Public routes */}
         <Route element={<PublicRoute />}>
@@ -138,6 +141,7 @@ function AppContent() {
           }
         />
       </Routes>
+      </main>
     </>
   );
 }
