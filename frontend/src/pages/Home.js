@@ -36,28 +36,28 @@ export default function Home() {
           style={{ backgroundImage: `url(${cakesBg})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-[#2b1608]/90 via-[#2b1608]/60 to-transparent" />
-          <div className="relative px-8 py-16 md:px-14 md:py-24 max-w-3xl text-white">
-            <p className="text-sm uppercase tracking-[0.2em] text-[#F3C99A] mb-4">Sweet Bite Bakery</p>
-            <h1 className="text-4xl md:text-6xl font-bold leading-[1.05] mb-5">
+          <div className="relative px-8 py-10 md:px-12 md:py-14 max-w-2xl text-white">
+            <p className="text-xs uppercase tracking-[0.2em] text-[#F3C99A] mb-3">Sweet Bite Bakery</p>
+            <h1 className="text-3xl md:text-5xl font-bold leading-[1.08] mb-4">
               Baked fresh,
               <br />
               ready when you are.
             </h1>
-            <p className="text-lg text-white/85 mb-8 max-w-lg">
+            <p className="text-base text-white/85 mb-6 max-w-lg">
               Pre-order cakes, breads and pastries for any day and time. We bake it for your schedule,
               so it’s fresh when you collect it.
             </p>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => navigate("/products")}
-                className="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white px-7 py-3 rounded-full font-semibold shadow-sm transition"
+                className="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white px-6 py-2.5 rounded-full font-semibold shadow-sm transition"
               >
                 <ShoppingBag size={18} />
                 Start a Pre-order
               </button>
               <button
                 onClick={() => navigate("/orders")}
-                className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white px-7 py-3 rounded-full font-semibold backdrop-blur transition"
+                className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white px-6 py-2.5 rounded-full font-semibold backdrop-blur transition"
               >
                 Track my orders
               </button>
@@ -67,7 +67,7 @@ export default function Home() {
       </section>
 
       {/* How pre-ordering works */}
-      <section className="px-6 lg:px-10 py-14">
+      <section className="px-6 lg:px-10 py-12">
         <div className="max-w-screen-2xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-brand-deep mb-2">How pre-ordering works</h2>
           <p className="text-gray-500 mb-8">Four simple steps from craving to cake box.</p>

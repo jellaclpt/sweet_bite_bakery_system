@@ -83,15 +83,7 @@ export default function Navbar() {
         {/* Center: Gooey Navigation */}
         <div className="flex-1 flex justify-center">
           <div style={{ width: "fit-content" }}>
-            <GooeyNav
-              items={navItems}
-              animationTime={500}
-              particleCount={12}
-              particleDistances={[60, 12]}
-              particleR={80}
-              timeVariance={200}
-              colors={[1, 2, 3, 4]}
-            />
+            <GooeyNav items={navItems} />
           </div>
         </div>
 
