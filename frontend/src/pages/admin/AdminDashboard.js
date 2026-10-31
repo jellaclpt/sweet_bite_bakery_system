@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { FiEdit, FiTrash2, FiX } from "react-icons/fi";
+import { FiEdit, FiSearch, FiTrash2, FiX } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { getImageUrl } from "../../utils/imageUrl";
 import Select from "../../components/Select";
@@ -315,17 +315,21 @@ export default function AdminDashboard() {
             </div>
 
             {/* ACTIONS */}
-            <div className="flex flex-wrap items-center gap-3">
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-56 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-              />
+            <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+              <div className="relative w-full sm:w-80">
+                <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <input
+                  type="search"
+                  placeholder="Search products..."
+                  aria-label="Search products"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-line rounded-xl text-sm text-gray-800 placeholder:text-gray-400 outline-none transition hover:border-brand/50 focus:border-brand focus:ring-4 focus:ring-brand/15"
+                />
+              </div>
 
               <Select
-                className="w-44"
+                className="w-full sm:w-44"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 aria-label="Filter by category"
@@ -340,7 +344,7 @@ export default function AdminDashboard() {
               />
 
               <Select
-                className="w-52"
+                className="w-full sm:w-64"
                 value={priceSort}
                 onChange={(e) => setPriceSort(e.target.value)}
                 aria-label="Sort by price"
