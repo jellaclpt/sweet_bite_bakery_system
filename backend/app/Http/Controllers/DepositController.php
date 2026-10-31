@@ -41,14 +41,15 @@ class DepositController extends Controller
             'proof' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
-        // Resubmitting replaces the earlier receipt
-        PublicFiles::delete($order->payment_proof_url);
+        // Resubmitting replaces the earlier receipt (removed only once the new one is saved)
+        $oldProof = $order->payment_proof_url;
 
         $order->payment_reference = trim($request->payment_reference);
         $order->payment_proof_url = PublicFiles::store($request->file('proof'), 'payment_proofs');
         $order->payment_submitted_at = now();
         $order->payment_status = Order::PAYMENT_DEPOSIT_SUBMITTED;
         $order->save();
+        PublicFiles::delete($oldProof);
 
         return response()->json([
             'message' => 'Payment proof received. We will confirm your deposit shortly.',

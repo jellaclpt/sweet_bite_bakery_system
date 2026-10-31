@@ -28,6 +28,13 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Image uploads. Copy "API environment variable" from Cloudinary Console > Settings > API Keys:
+    // CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>
+    'cloudinary' => [
+        'url' => env('CLOUDINARY_URL'),
+        'folder' => env('CLOUDINARY_FOLDER', 'sweet-bite'),
+    ],
+
     // Google sign-in: the OAuth "Web application" client ID from Google Cloud Console
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),

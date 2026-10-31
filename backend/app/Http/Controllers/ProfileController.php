@@ -30,12 +30,14 @@ class ProfileController extends Controller
             $user->address = $validated['address'] ?? null;
         }
 
+        $oldImage = null;
         if ($request->hasFile('image')) {
-            PublicFiles::delete($user->image_url);
+            $oldImage = $user->image_url;
             $user->image_url = PublicFiles::store($request->file('image'), 'profiles');
         }
 
         $user->save();
+        PublicFiles::delete($oldImage);
 
         return response()->json([
             'message' => 'Profile updated successfully',
