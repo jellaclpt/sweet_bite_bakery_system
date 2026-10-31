@@ -1,11 +1,20 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 import AdminTopbar from "./AdminTopbar";
 import { useSidebar } from "../../../context/SidebarContext";
 
-// Shared admin frame: sidebar, topbar and a scrollable content area
+// Shared admin frame. It's a route layout, so the sidebar and top bar stay mounted while
+// moving between admin pages (that's what lets the sidebar's click animation finish).
 export default function AdminLayout({ children }) {
   const { collapsed, toggle } = useSidebar();
+  const { pathname } = useLocation();
+  const contentRef = useRef(null);
+
+  // Each admin page starts at the top
+  useEffect(() => {
+    contentRef.current?.scrollTo?.(0, 0);
+  }, [pathname]);
 
   return (
     <div className="flex h-screen bg-cream overflow-hidden">
@@ -16,7 +25,9 @@ export default function AdminLayout({ children }) {
         }`}
       >
         <AdminTopbar toggleSidebar={toggle} isSidebarOpen={!collapsed} />
-        <div className="flex-1 p-6 overflow-y-auto">{children}</div>
+        <div ref={contentRef} className="flex-1 p-6 overflow-y-auto">
+          {children ?? <Outlet />}
+        </div>
       </div>
     </div>
   );

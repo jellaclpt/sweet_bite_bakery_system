@@ -148,7 +148,7 @@ export default function Profile() {
   const handlePasswordChange = (e) =>
     setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
 
-  // Accounts created with Google have no password yet; they set one instead of changing it
+  // Accounts without a password (from the old Google sign-in) set one instead of changing it
   const settingFirstPassword = user?.has_password === false;
 
   const handlePasswordUpdate = async (e) => {
@@ -185,7 +185,13 @@ export default function Profile() {
   return (
     <div className="min-h-screen pt-6 pb-8 px-4 bg-cream">
       <div className="bg-white shadow-sm border border-line rounded-2xl p-6 sm:p-8 w-full max-w-lg mx-auto">
-        <h1 className="text-3xl font-bold mb-6 text-center text-brand">My Profile</h1>
+        <h1 className="text-3xl font-bold text-center text-brand">My Profile</h1>
+        {user?.username && (
+          <p className="text-center text-sm text-gray-500 mt-1 mb-6">
+            Log in as <span className="font-medium text-brand-deep">@{user.username}</span>
+          </p>
+        )}
+        {!user?.username && <div className="mb-6" />}
 
         <div className="flex justify-center mb-6">
           <div
@@ -265,7 +271,7 @@ export default function Profile() {
         </button>
         {settingFirstPassword && (
           <p className="text-xs text-gray-500 text-center mt-2">
-            You signed up with Google. Set a password to also log in with your email.
+            Your account doesn't have a password yet. Set one to log in.
           </p>
         )}
       </div>
@@ -294,7 +300,7 @@ export default function Profile() {
                   </h2>
                   <p className="text-sm text-gray-500">
                     {settingFirstPassword
-                      ? "Then you can log in with your email or with Google."
+                      ? "Then you can log in with your username or email."
                       : "Use at least 6 characters."}
                   </p>
                 </div>

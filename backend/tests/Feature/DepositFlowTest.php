@@ -8,7 +8,6 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -146,50 +145,5 @@ class DepositFlowTest extends TestCase
         $this->actingAs($customer, 'sanctum')
             ->patchJson("/api/admin/orders/{$order->id}/payment", ['action' => 'mark_paid'])
             ->assertForbidden();
-    }
-
-    public function test_google_sign_in_creates_then_reuses_the_account(): void
-    {
-        config(['services.google.client_id' => 'test-client.apps.googleusercontent.com']);
-        Http::fake([
-            'oauth2.googleapis.com/*' => Http::response([
-                'iss' => 'https://accounts.google.com',
-                'aud' => 'test-client.apps.googleusercontent.com',
-                'sub' => 'google-123',
-                'email' => 'carmen@example.com',
-                'email_verified' => 'true',
-                'name' => 'Carmen Laguda',
-                'picture' => 'https://example.com/p.jpg',
-            ]),
-        ]);
-
-        $this->postJson('/api/auth/google', ['credential' => 'fake-id-token'])
-            ->assertCreated()
-            ->assertJsonPath('is_new', true)
-            ->assertJsonPath('user.email', 'carmen@example.com')
-            ->assertJsonStructure(['token']);
-
-        $this->postJson('/api/auth/google', ['credential' => 'fake-id-token'])
-            ->assertOk()
-            ->assertJsonPath('is_new', false);
-
-        $this->assertSame(1, User::where('email', 'carmen@example.com')->count());
-    }
-
-    public function test_google_token_for_another_app_is_rejected(): void
-    {
-        config(['services.google.client_id' => 'test-client.apps.googleusercontent.com']);
-        Http::fake([
-            'oauth2.googleapis.com/*' => Http::response([
-                'iss' => 'accounts.google.com',
-                'aud' => 'someone-elses-app',
-                'sub' => 'x',
-                'email' => 'x@example.com',
-                'email_verified' => true,
-            ]),
-        ]);
-
-        $this->postJson('/api/auth/google', ['credential' => 'token'])->assertUnauthorized();
-        $this->assertSame(0, User::count());
     }
 }

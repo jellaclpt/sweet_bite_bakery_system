@@ -21,16 +21,28 @@ class DatabaseSeeder extends Seeder
         }
     }
 
-    // The admin account comes from environment variables, so no password is written in the code.
-    // Setting ADMIN_PASSWORD (for a new or existing ADMIN_EMAIL) also resets that account's password,
-    // which is how to change the admin password on Render.
+    // The admin account comes from environment variables, so no password is written in the code:
+    // ADMIN_USERNAME and ADMIN_PASSWORD (ADMIN_EMAIL optional). Changing ADMIN_PASSWORD and
+    // redeploying also resets the admin password.
     private function seedAdmin(): void
     {
+        $username = strtolower(trim((string) config('bakery.admin_username')));
         $email = strtolower(trim((string) config('bakery.admin_email')));
         $password = (string) config('bakery.admin_password');
 
-        if ($email === '' || $password === '') {
-            $this->command?->warn('ADMIN_EMAIL / ADMIN_PASSWORD not set: no admin account created or updated.');
+        if ($username === '' && $email !== '') {
+            // Older setups only had ADMIN_EMAIL: keep them working with a username from the email
+            $username = substr(preg_replace('/[^a-z0-9._]+/', '', strstr($email, '@', true) ?: $email), 0, 30);
+        }
+
+        if ($username === '' || $password === '') {
+            $this->command?->warn('ADMIN_USERNAME / ADMIN_PASSWORD not set: no admin account created or updated.');
+
+            return;
+        }
+
+        if (!preg_match('/^[a-z0-9._]{3,30}$/', $username)) {
+            $this->command?->error('ADMIN_USERNAME must be 3 to 30 characters (letters, numbers, dots, underscores): admin account not updated.');
 
             return;
         }
@@ -41,7 +53,27 @@ class DatabaseSeeder extends Seeder
             return;
         }
 
-        $admin = User::firstOrNew(['email' => $email]);
+        // Find the admin by username, or by email (an admin created before usernames existed)
+        $byUsername = \App\Http\Controllers\AuthController::findByUsername($username);
+        $byEmail = $email !== '' ? \App\Http\Controllers\AuthController::findByEmail($email) : null;
+
+        // Never take over a customer's account just because the username matches
+        if ($byUsername && !$byUsername->isAdmin() && (!$byEmail || $byEmail->id !== $byUsername->id)) {
+            $this->command?->error("ADMIN_USERNAME \"{$username}\" already belongs to a customer: choose another username. Admin account not updated.");
+
+            return;
+        }
+
+        $admin = $byUsername ?? $byEmail ?? new User();
+
+        $admin->username = $username;
+        if ($email !== '') {
+            if ($byEmail && $admin->exists && $byEmail->id !== $admin->id) {
+                $this->command?->warn("ADMIN_EMAIL {$email} is used by another account, so it wasn't added to the admin.");
+            } else {
+                $admin->email = $email;
+            }
+        }
 
         // Only re-hash when it actually changed, so existing sign-ins aren't affected on every restart
         if (!$admin->exists || !Hash::check($password, $admin->password)) {
@@ -53,7 +85,7 @@ class DatabaseSeeder extends Seeder
         $admin->email_verified_at = $admin->email_verified_at ?: now();
         $admin->save();
 
-        $this->lockLeakedDemoAccounts($admin->email);
+        $this->lockLeakedDemoAccounts((string) $admin->email);
     }
 
     // Older versions of this file created these two accounts on the live site with passwords
@@ -86,6 +118,7 @@ class DatabaseSeeder extends Seeder
     {
         User::firstOrCreate(['email' => 'admin@gmail.com'], [
             'name' => 'Admin User',
+            'username' => 'admin',
             'password' => Hash::make('admin12345'),
             'role' => 'admin',
             'email_verified_at' => now(),
@@ -93,6 +126,7 @@ class DatabaseSeeder extends Seeder
 
         User::firstOrCreate(['email' => 'test@gmail.com'], [
             'name' => 'Test Customer',
+            'username' => 'testcustomer',
             'password' => Hash::make('test12345'),
             'role' => 'user',
             'phone' => '0987654321',

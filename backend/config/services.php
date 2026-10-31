@@ -35,11 +35,6 @@ return [
         'folder' => env('CLOUDINARY_FOLDER', 'sweet-bite'),
     ],
 
-    // Google sign-in: the OAuth "Web application" client ID from Google Cloud Console
-    'google' => [
-        'client_id' => env('GOOGLE_CLIENT_ID'),
-    ],
-
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

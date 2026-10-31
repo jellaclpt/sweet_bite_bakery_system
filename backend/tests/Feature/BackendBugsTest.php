@@ -191,11 +191,11 @@ class BackendBugsTest extends TestCase
     public function test_email_case_does_not_create_duplicates_or_block_login(): void
     {
         $this->postJson('/api/register', [
-            'name' => 'Carmen', 'email' => 'Carmen@Example.com', 'password' => 'secret123', 'password_confirmation' => 'secret123',
+            'name' => 'Carmen', 'username' => 'carmen', 'email' => 'Carmen@Example.com', 'password' => 'secret123', 'password_confirmation' => 'secret123',
         ])->assertCreated()->assertJsonPath('user.email', 'carmen@example.com');
 
         $this->postJson('/api/register', [
-            'name' => 'Again', 'email' => 'CARMEN@example.com', 'password' => 'secret123', 'password_confirmation' => 'secret123',
+            'name' => 'Again', 'username' => 'carmen2', 'email' => 'CARMEN@example.com', 'password' => 'secret123', 'password_confirmation' => 'secret123',
         ])->assertUnprocessable()->assertJsonValidationErrors('email');
 
         $this->postJson('/api/login', ['email' => ' CARMEN@EXAMPLE.COM ', 'password' => 'secret123'])->assertOk();
@@ -308,7 +308,7 @@ class BackendBugsTest extends TestCase
     public function test_live_seeding_never_creates_accounts_with_published_passwords(): void
     {
         $this->app['env'] = 'production';
-        config(['bakery.admin_email' => null, 'bakery.admin_password' => null]);
+        config(['bakery.admin_username' => null, 'bakery.admin_email' => null, 'bakery.admin_password' => null]);
 
         $this->artisan('db:seed', ['--class' => DatabaseSeeder::class, '--force' => true])->assertSuccessful();
 
@@ -324,7 +324,7 @@ class BackendBugsTest extends TestCase
         $test = User::create(['name' => 'Test', 'email' => 'test@gmail.com', 'password' => Hash::make('test12345'), 'role' => 'user']);
         $test->createToken('old');
 
-        config(['bakery.admin_email' => 'Owner@SweetBite.ph', 'bakery.admin_password' => 'a-long-new-password']);
+        config(['bakery.admin_username' => 'Owner', 'bakery.admin_email' => 'Owner@SweetBite.ph', 'bakery.admin_password' => 'a-long-new-password']);
         $this->artisan('db:seed', ['--class' => DatabaseSeeder::class, '--force' => true])->assertSuccessful();
 
         $owner = User::where('email', 'owner@sweetbite.ph')->first();
