@@ -148,6 +148,9 @@ export default function Profile() {
   const handlePasswordChange = (e) =>
     setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
 
+  // Accounts created with Google have no password yet; they set one instead of changing it
+  const settingFirstPassword = user?.has_password === false;
+
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -161,11 +164,12 @@ export default function Profile() {
     setPasswordLoading(true);
     try {
       // Goes to the backend API (this used to be sent to the website itself and never worked)
-      await api.put("/profile/change-password", {
-        old_password: passwordData.oldPassword,
+      const res = await api.put("/profile/change-password", {
+        ...(settingFirstPassword ? {} : { old_password: passwordData.oldPassword }),
         new_password: passwordData.newPassword,
       });
-      toast.success("Password changed successfully!");
+      toast.success(res.data?.message || "Password changed successfully!");
+      if (res.data?.user) setUser(res.data.user);
       setShowPasswordModal(false);
       setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err) {
@@ -257,8 +261,13 @@ export default function Profile() {
           className="w-full mt-4 rounded-lg py-2 border-2"
           style={{ borderColor: "#d4a574", color: "#974D07" }}
         >
-          Change Password
+          {settingFirstPassword ? "Set a Password" : "Change Password"}
         </button>
+        {settingFirstPassword && (
+          <p className="text-xs text-gray-500 text-center mt-2">
+            You signed up with Google. Set a password to also log in with your email.
+          </p>
+        )}
       </div>
 
       {/* Password Modal */}
@@ -280,8 +289,14 @@ export default function Profile() {
                   <KeyRound size={18} />
                 </span>
                 <div>
-                  <h2 id="change-password-title" className="text-xl font-bold text-brand-deep">Change Password</h2>
-                  <p className="text-sm text-gray-500">Use at least 6 characters.</p>
+                  <h2 id="change-password-title" className="text-xl font-bold text-brand-deep">
+                    {settingFirstPassword ? "Set a Password" : "Change Password"}
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    {settingFirstPassword
+                      ? "Then you can log in with your email or with Google."
+                      : "Use at least 6 characters."}
+                  </p>
                 </div>
               </div>
               <button
@@ -295,16 +310,18 @@ export default function Profile() {
             </div>
 
             <form onSubmit={handlePasswordUpdate} className="p-6 space-y-4">
-              <AuthField
-                label="Current password"
-                icon={Lock}
-                type="password"
-                name="oldPassword"
-                value={passwordData.oldPassword}
-                onChange={handlePasswordChange}
-                autoComplete="current-password"
-                required
-              />
+              {!settingFirstPassword && (
+                <AuthField
+                  label="Current password"
+                  icon={Lock}
+                  type="password"
+                  name="oldPassword"
+                  value={passwordData.oldPassword}
+                  onChange={handlePasswordChange}
+                  autoComplete="current-password"
+                  required
+                />
+              )}
               <AuthField
                 label="New password"
                 icon={Lock}
@@ -338,7 +355,7 @@ export default function Profile() {
                   disabled={passwordLoading}
                   className="flex-1 bg-brand hover:bg-brand-hover text-white rounded-xl py-3 font-semibold transition disabled:opacity-60"
                 >
-                  {passwordLoading ? "Saving..." : "Update Password"}
+                  {passwordLoading ? "Saving..." : settingFirstPassword ? "Set Password" : "Update Password"}
                 </button>
               </div>
             </form>

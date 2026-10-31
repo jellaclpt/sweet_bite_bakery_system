@@ -44,18 +44,25 @@ class ProfileController extends Controller
     }
 
     // PUT /profile/change-password { old_password, new_password }
+    // Accounts created with Google have no password yet: they send only new_password
+    // to set one, after which they can also log in with their email.
     public function changePassword(Request $request)
     {
         $user = $request->user();
+        $settingFirstPassword = !$user->has_password;
 
         $request->validate([
-            'old_password' => 'required|string',
-            'new_password' => 'required|string|min:6|max:255|different:old_password',
+            'old_password' => $settingFirstPassword ? 'nullable|string' : 'required|string',
+            'new_password' => array_filter([
+                'required', 'string', 'min:6', 'max:255',
+                $settingFirstPassword ? null : 'different:old_password',
+            ]),
         ], [
+            'old_password.required' => 'Please enter your current password.',
             'new_password.different' => 'Your new password must be different from the current one.',
         ]);
 
-        if (!Hash::check($request->old_password, $user->password)) {
+        if (!$settingFirstPassword && !Hash::check($request->old_password, $user->password)) {
             return response()->json([
                 'message' => 'Current password is incorrect',
                 'errors' => ['old_password' => ['Current password is incorrect']],
@@ -71,6 +78,9 @@ class ProfileController extends Controller
             ->when($current instanceof \Laravel\Sanctum\PersonalAccessToken, fn ($q) => $q->whereKeyNot($current->id))
             ->delete();
 
-        return response()->json(['message' => 'Password changed successfully']);
+        return response()->json([
+            'message' => $settingFirstPassword ? 'Password set. You can now also log in with your email.' : 'Password changed successfully',
+            'user' => $user->fresh(),
+        ]);
     }
 }

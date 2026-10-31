@@ -45,6 +45,15 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+    // Sent with the user so the website knows whether to show "Set Password" or "Change Password"
+    protected $appends = ['has_password'];
+
+    // False for accounts created with Google that haven't chosen a password yet
+    public function getHasPasswordAttribute(): bool
+    {
+        return !empty($this->attributes['password'] ?? null);
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
