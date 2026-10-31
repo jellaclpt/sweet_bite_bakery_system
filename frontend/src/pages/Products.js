@@ -195,10 +195,25 @@ export default function Products() {
         </header>
 
         {groups.length > 0 && (
-          // Category filter: scrolls sideways on phones, stays under the navbar while scrolling
+          // Filters stay under the navbar while scrolling. Phones: two dropdowns. Larger screens: category chips + sort.
           <div className="sticky top-0 md:top-16 z-20 -mx-4 px-4 sm:mx-0 sm:px-0 py-2 mb-4 sm:mb-6 bg-cream/95 backdrop-blur">
-            <div className="flex items-center gap-2 sm:gap-3">
-            <div className="flex-1 min-w-0 flex gap-2 overflow-x-auto no-scrollbar" role="tablist" aria-label="Product categories">
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
+            {/* Phones: category dropdown */}
+            <Select
+              className="grow basis-[150px] min-w-0 sm:hidden"
+              size="sm"
+              aria-label="Product category"
+              value={activeCategory}
+              onChange={(e) => {
+                setActiveCategory(e.target.value);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              options={[
+                { value: "all", label: `All (${products.length})` },
+                ...groups.map((g) => ({ value: g.name, label: `${g.name} (${g.items.length})` })),
+              ]}
+            />
+            <div className="hidden sm:flex flex-1 min-w-0 gap-2 overflow-x-auto no-scrollbar" role="tablist" aria-label="Product categories">
               {[{ name: "all", label: "All", count: products.length }, ...groups.map((g) => ({ name: g.name, label: g.name, count: g.items.length }))].map(
                 ({ name, label, count }) => {
                   const active = activeCategory === name;
@@ -226,7 +241,7 @@ export default function Products() {
               )}
             </div>
             <Select
-              className="shrink-0 w-36 sm:w-56"
+              className="grow basis-[150px] min-w-0 sm:grow-0 sm:basis-auto sm:w-56"
               size="sm"
               aria-label="Sort products"
               value={sortBy}
