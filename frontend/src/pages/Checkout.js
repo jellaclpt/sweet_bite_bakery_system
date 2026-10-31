@@ -132,52 +132,54 @@ export default function Checkout() {
             ) : (
               <ul className="divide-y divide-line">
                 {items.map((it) => (
-                  <li key={it.product.id} className="flex items-center justify-between gap-4 py-4">
-                    <div className="flex items-center gap-4 min-w-0">
-                      <img
-                        className="w-16 h-16 object-cover rounded-xl"
-                        src={getImageUrl(it.product.image_url)}
-                        alt={it.product.name}
-                      />
+                  <li key={it.product.id} className="flex items-center gap-3 sm:gap-4 py-4">
+                    <img
+                      className="w-14 h-14 sm:w-16 sm:h-16 shrink-0 object-cover rounded-xl"
+                      src={getImageUrl(it.product.image_url)}
+                      alt={it.product.name}
+                    />
+
+                    {/* Phones: name and price on top, quantity and total underneath. Wider screens: one row. */}
+                    <div className="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
                       <div className="min-w-0">
                         <div className="font-semibold text-gray-800 truncate">{it.product.name}</div>
                         <div className="text-sm text-gray-500">
                           ₱{Number(it.product.base_price).toFixed(2)} each
                         </div>
                       </div>
+
+                      <div className="mt-2 sm:mt-0 flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0">
+                        <div className="flex items-center rounded-full border border-line">
+                          <button
+                            aria-label="Decrease quantity"
+                            className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-brand"
+                            onClick={() => updateQuantity(it.product.id, it.quantity - 1)}
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span className="w-6 text-center text-sm font-medium">{it.quantity}</span>
+                          <button
+                            aria-label="Increase quantity"
+                            className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-brand"
+                            onClick={() => updateQuantity(it.product.id, it.quantity + 1)}
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+
+                        <div className="sm:w-24 text-right font-semibold text-gray-800">
+                          ₱{(Number(it.product.base_price) * it.quantity).toFixed(2)}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center rounded-full border border-line">
-                        <button
-                          aria-label="Decrease quantity"
-                          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-brand"
-                          onClick={() => updateQuantity(it.product.id, it.quantity - 1)}
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <span className="w-6 text-center text-sm font-medium">{it.quantity}</span>
-                        <button
-                          aria-label="Increase quantity"
-                          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-brand"
-                          onClick={() => updateQuantity(it.product.id, it.quantity + 1)}
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-
-                      <div className="w-24 text-right font-semibold text-gray-800">
-                        ₱{(Number(it.product.base_price) * it.quantity).toFixed(2)}
-                      </div>
-
-                      <button
-                        onClick={() => removeItem(it.product.id)}
-                        aria-label={`Remove ${it.product.name}`}
-                        className="text-gray-400 hover:text-red-600 transition"
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => removeItem(it.product.id)}
+                      aria-label={`Remove ${it.product.name}`}
+                      className="shrink-0 self-start sm:self-center text-gray-400 hover:text-red-600 transition"
+                    >
+                      <X size={18} />
+                    </button>
                   </li>
                 ))}
               </ul>
