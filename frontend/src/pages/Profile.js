@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { KeyRound, Lock, X } from "lucide-react";
 import { AuthField } from "../components/AuthLayout";
-import axios from "axios";
+import api from "../api/api";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import { getImageUrl } from "../utils/imageUrl";
@@ -44,11 +44,8 @@ export default function Profile() {
     // fallback: try to fetch user from API (if context not populated)
     const fetchUser = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-        const res = await axios.get("/user", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        if (!localStorage.getItem("token")) return;
+        const res = await api.get("/user");
         const u = res.data.user || res.data;
         setForm({
           name: u.name || "",
@@ -87,26 +84,6 @@ export default function Profile() {
 
   const handleImageClick = () => fileInputRef.current?.click();
 
-  // debug helper to log FormData contents (for dev only)
-  // eslint-disable-next-line no-unused-vars
-  const logFormData = (fd) => {
-    try {
-      const entries = [];
-      // eslint-disable-next-line no-unused-vars
-      for (const pair of fd.entries()) {
-        // pair could be File; for File show file name
-        entries.push(
-          `${pair[0]} => ${
-            pair[1] instanceof File ? `[File:${pair[1].name}]` : pair[1]
-          }`
-        );
-      }
-      console.log("FormData entries:", entries);
-    } catch (e) {
-      console.log("Could not read FormData entries (browser limitation)", e);
-    }
-  };
-
   // save profile
   const handleUpdate = async (e) => {
     e.preventDefault();
@@ -120,51 +97,23 @@ export default function Profile() {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      
-      if (!token) {
+      if (!localStorage.getItem("token")) {
         toast.error("Authentication required. Please login again.");
         setLoading(false);
         return;
       }
 
-      // Create FormData
+      // Multipart forms can't be sent as PUT from the browser, so Laravel reads _method instead
       const fd = new FormData();
-      fd.append("_method", "PUT"); // <-- Spoof PUT for Laravel
+      fd.append("_method", "PUT");
       fd.append("name", trimmedName);
       fd.append("phone", form.phone ? form.phone.trim() : "");
       fd.append("address", form.address ? form.address.trim() : "");
-      
-      // Only append image if it's a valid File object
       if (form.image && form.image instanceof File) {
-        console.log("Appending image:", form.image.name);
         fd.append("image", form.image);
       }
 
-      // Debug: log what will be sent
-      console.log("Sending FormData with name:", trimmedName);
-      for (const [key, value] of fd.entries()) {
-        if (value instanceof File) {
-          console.log(`${key}: File(${value.name}, ${value.size} bytes)`);
-        } else {
-          console.log(`${key}: "${value}"`);
-        }
-      }
-
-      // Use direct axios call without custom interceptors
-      const apiBase = (process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '');
-      const res = await axios.post(
-        `${apiBase}/api/profile/update`,
-        fd,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-
-      console.log("Profile update response:", res.data);
+      const res = await api.post("/profile/update", fd);
       toast.success("Profile updated successfully!");
 
       // Update global user object
@@ -179,21 +128,13 @@ export default function Profile() {
       // Reset file input state
       setForm((prev) => ({ ...prev, image: null }));
     } catch (err) {
-      console.error("Profile update error:", err);
       const resp = err?.response?.data;
-      
-      console.error("Full error response:", resp);
 
       if (resp?.errors) {
-        // Show all validation errors with detailed logging
-        console.error("Validation errors details:", resp.errors);
-        Object.entries(resp.errors).forEach(([field, messages]) => {
-          const errorMsg = Array.isArray(messages) ? messages.join(", ") : messages;
-          console.error(`Field "${field}":`, errorMsg);
-          toast.error(`${field}: ${errorMsg}`);
+        Object.values(resp.errors).forEach((messages) => {
+          toast.error(Array.isArray(messages) ? messages.join(" ") : messages);
         });
       } else if (resp?.message) {
-        console.error("Error message:", resp.message);
         toast.error(resp.message);
       } else {
         toast.error("Failed to update profile. Please try again.");
@@ -219,20 +160,19 @@ export default function Profile() {
     }
     setPasswordLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      await axios.put(
-        "/profile/change-password",
-        {
-          old_password: passwordData.oldPassword,
-          new_password: passwordData.newPassword,
-        },
-        { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } }
-      );
+      // Goes to the backend API (this used to be sent to the website itself and never worked)
+      await api.put("/profile/change-password", {
+        old_password: passwordData.oldPassword,
+        new_password: passwordData.newPassword,
+      });
       toast.success("Password changed successfully!");
       setShowPasswordModal(false);
       setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to change password.");
+      const errors = err?.response?.data?.errors;
+      toast.error(
+        (errors && Object.values(errors).flat()[0]) || err?.response?.data?.message || "Failed to change password."
+      );
     } finally {
       setPasswordLoading(false);
     }

@@ -21,7 +21,15 @@ class Order extends Model
     public const PAYMENT_DEPOSIT_PAID = 'deposit_paid';           // admin confirmed the deposit
     public const PAYMENT_PAID = 'paid';                           // balance settled too
 
+    // Money always comes back as a string with 2 decimals ("55.85"), whether the
+    // order was just created or loaded from the database
     protected $casts = [
+        'subtotal' => 'decimal:2',
+        'discount' => 'decimal:2',
+        'shipping_fee' => 'decimal:2',
+        'total' => 'decimal:2',
+        'deposit_amount' => 'decimal:2',
+        'amount_paid' => 'decimal:2',
         'payment_submitted_at' => 'datetime',
         'payment_confirmed_at' => 'datetime',
     ];

@@ -8,10 +8,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
 {
-    public function handle($request, Closure $next)
+    // Only lets admins through. Always used after auth:sanctum, but checks for a user anyway.
+    public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user()->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        if (!$user->isAdmin()) {
+            return response()->json(['message' => 'Only admins can do this.'], 403);
         }
 
         return $next($request);

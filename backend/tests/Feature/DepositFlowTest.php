@@ -30,11 +30,10 @@ class DepositFlowTest extends TestCase
 
     private function placeOrder(User $user, Product $product, int $qty = 2): Order
     {
-        $res = $this->postJson('/api/orders', [
-            'user_id' => $user->id,
+        $res = $this->actingAs($user, 'sanctum')->postJson('/api/orders', [
             'items' => [['product_id' => $product->id, 'quantity' => $qty]],
             'fulfillment' => 'delivery',
-            'pickup_time' => now()->addDays(2)->setTime(10, 0)->format('Y-m-d H:i:s'),
+            'pickup_time' => now('Asia/Manila')->addDays(2)->setTime(10, 0)->format('Y-m-d H:i:s'),
             'payment_method' => 'gcash',
         ]);
         $res->assertCreated();

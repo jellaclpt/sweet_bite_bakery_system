@@ -226,6 +226,16 @@ export default function AdminOrders() {
                     {o.payment_status === "awaiting_deposit" && (
                       <span className="text-xs text-gray-400">Waiting for customer</span>
                     )}
+                    {/* Orders placed before deposits existed */}
+                    {o.payment_status === "unpaid" && o.status !== "cancelled" && (
+                      <button
+                        onClick={() => updatePayment(o, "mark_paid", `Order #${o.id} marked fully paid`)}
+                        disabled={busyId === o.id}
+                        className="border border-brand text-brand hover:bg-sand text-xs font-semibold px-3 py-2 rounded-lg disabled:opacity-50"
+                      >
+                        Mark paid
+                      </button>
+                    )}
                     {o.payment_status === "paid" && <span className="text-xs text-green-700 font-medium">Settled</span>}
                   </td>
                 </tr>

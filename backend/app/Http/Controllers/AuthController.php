@@ -15,11 +15,17 @@ class AuthController extends Controller
     // REGISTER
     public function register(Request $request)
     {
+        $this->normalizeEmail($request);
+
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users',
+            'email' => ['required', 'string', 'email', 'max:255', function ($attribute, $value, $fail) {
+                if (self::findByEmail($value)) {
+                    $fail('An account with this email already exists. Try logging in instead.');
+                }
+            }],
             'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:500',
             'password' => 'required|string|min:6|confirmed',
             // 'role' is not accepted from public registration
         ]);
@@ -46,12 +52,14 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
+            $this->normalizeEmail($request);
+
             $request->validate([
                 'email' => 'required|string|email',
                 'password' => 'required|string'
             ]);
 
-            $user = User::where('email', $request->email)->first();
+            $user = self::findByEmail($request->email);
 
             if (!$user || !Hash::check($request->password, $user->password)) {
                 throw ValidationException::withMessages([
@@ -72,7 +80,6 @@ class AuthController extends Controller
             Log::error('Login error: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An error occurred during login. Please try again.',
-                'error' => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
     }
@@ -102,7 +109,7 @@ class AuthController extends Controller
         }
 
         $user = User::where('google_id', $info['sub'])->first()
-            ?? User::where('email', $info['email'])->first();
+            ?? self::findByEmail($info['email']);
 
         $isNew = false;
         if (!$user) {
@@ -135,12 +142,26 @@ class AuthController extends Controller
         ], $isNew ? 201 : 200);
     }
 
+    // Emails are matched ignoring case, including accounts saved before emails were lowercased
+    public static function findByEmail(string $email): ?User
+    {
+        return User::whereRaw('LOWER(email) = ?', [strtolower(trim($email))])->first();
+    }
+
+    private function normalizeEmail(Request $request): void
+    {
+        if (is_string($request->input('email'))) {
+            $request->merge(['email' => strtolower(trim($request->input('email')))]);
+        }
+    }
+
     // LOGOUT
     public function logout(Request $request)
     {
-        // Delete all tokens for the authenticated user
-        if ($request->user()) {
-            $request->user()->tokens()->delete();
+        // Sign out this device only; other devices stay signed in
+        $token = $request->user()?->currentAccessToken();
+        if ($token instanceof \Laravel\Sanctum\PersonalAccessToken) {
+            $token->delete();
         }
 
         return response()->json([

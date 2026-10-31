@@ -58,7 +58,6 @@ export default function Checkout() {
       }
 
       const payload = {
-        user_id: user.id,
         items: items.map((it) => ({
           product_id: it.product.id,
           quantity: it.quantity,
@@ -225,6 +224,11 @@ export default function Checkout() {
                 dateFormat="MMMM d, yyyy h:mm aa"
                 placeholderText="Select date and time"
                 minDate={new Date()}
+                // Only offer times the bakery is open (8 AM to 6 PM) and not already past
+                filterTime={(time) => {
+                  const minutes = time.getHours() * 60 + time.getMinutes();
+                  return time > new Date() && minutes >= 8 * 60 && minutes <= 18 * 60;
+                }}
                 className={fieldClass}
                 wrapperClassName="w-full"
               />

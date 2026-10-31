@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Support\PublicFiles;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 // Customer side of the pre-order deposit: show where to pay, then accept proof of payment.
 class DepositController extends Controller
@@ -41,13 +41,11 @@ class DepositController extends Controller
             'proof' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
-        // Same storage approach as product images: public disk, full URL saved on the record
-        $file = $request->file('proof');
-        $filename = 'order-' . $order->id . '-' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-        $file->storeAs('payment_proofs', $filename, 'public');
+        // Resubmitting replaces the earlier receipt
+        PublicFiles::delete($order->payment_proof_url);
 
-        $order->payment_reference = $request->payment_reference;
-        $order->payment_proof_url = url('storage/payment_proofs/' . $filename);
+        $order->payment_reference = trim($request->payment_reference);
+        $order->payment_proof_url = PublicFiles::store($request->file('proof'), 'payment_proofs');
         $order->payment_submitted_at = now();
         $order->payment_status = Order::PAYMENT_DEPOSIT_SUBMITTED;
         $order->save();

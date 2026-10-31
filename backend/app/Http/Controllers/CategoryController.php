@@ -13,40 +13,14 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        // Ensure default categories exist (idempotent)
-        $defaultCategories = [
-            ['name' => 'Cake'],
-            ['name' => 'Bread'],
-            ['name' => 'Pastry'],
-            ['name' => 'Cupcake'],
-            ['name' => 'Cookies'],
-        ];
-
-        foreach ($defaultCategories as $category) {
-            Category::firstOrCreate(
-                ['name' => $category['name']],
-                $category
-            );
+        // The seeder adds the default categories on deploy; this only fills an empty table
+        // (e.g. a fresh database) instead of writing to the database on every request.
+        if (!Category::exists()) {
+            foreach (['Cake', 'Bread', 'Pastry', 'Cupcake', 'Cookies'] as $name) {
+                Category::firstOrCreate(['name' => $name]);
+            }
         }
 
-        return response()->json(Category::all());
-    }
-
-    /**
-     * Find or create a category by name
-     */
-    public function findOrCreate(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255'
-        ]);
-
-        $category = Category::firstOrCreate(
-            ['name' => $request->name],
-            ['name' => $request->name]
-        );
-
-        return response()->json($category);
+        return response()->json(Category::orderBy('name')->get());
     }
 }
-

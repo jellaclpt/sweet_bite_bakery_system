@@ -39,6 +39,25 @@ class AdminOrderController extends Controller
 
         $order = Order::findOrFail($id);
 
+        // Which payment states each action may start from. Anything else is a mistake
+        // (e.g. confirming a deposit twice, or moving a fully paid order backwards).
+        $allowedFrom = [
+            // awaiting_deposit too: the customer may have paid the deposit in person
+            'confirm_deposit' => [Order::PAYMENT_AWAITING_DEPOSIT, Order::PAYMENT_DEPOSIT_SUBMITTED],
+            'reject_deposit' => [Order::PAYMENT_DEPOSIT_SUBMITTED],
+            'mark_paid' => [Order::PAYMENT_AWAITING_DEPOSIT, Order::PAYMENT_DEPOSIT_SUBMITTED, Order::PAYMENT_DEPOSIT_PAID, 'unpaid'],
+        ];
+
+        if (!in_array($order->payment_status, $allowedFrom[$request->action], true)) {
+            return response()->json([
+                'message' => "This order's payment is already \"" . str_replace('_', ' ', $order->payment_status) . '", so that action does not apply.',
+            ], 422);
+        }
+
+        if ($order->status === 'cancelled' && $request->action !== 'reject_deposit') {
+            return response()->json(['message' => 'This order was cancelled.'], 422);
+        }
+
         switch ($request->action) {
             case 'confirm_deposit':
                 $order->payment_status = Order::PAYMENT_DEPOSIT_PAID;
@@ -50,6 +69,7 @@ class AdminOrderController extends Controller
                 break;
 
             case 'reject_deposit':
+                // Keep the receipt and reference so the admin can still see what was sent
                 $order->payment_status = Order::PAYMENT_AWAITING_DEPOSIT;
                 $order->payment_submitted_at = null;
                 break;
@@ -66,7 +86,7 @@ class AdminOrderController extends Controller
 
         return response()->json([
             'message' => 'Payment updated.',
-            'order' => $order->load(['items', 'user:id,name,email,phone,address']),
+            'order' => $order->load(['items.product:id,name,image_url', 'user:id,name,email,phone,address']),
         ]);
     }
 
@@ -84,7 +104,7 @@ class AdminOrderController extends Controller
 
         return response()->json([
             'message' => 'Order status updated.',
-            'order' => $order->load(['items', 'user:id,name,email,phone,address']),
+            'order' => $order->load(['items.product:id,name,image_url', 'user:id,name,email,phone,address']),
         ]);
     }
 
