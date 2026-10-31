@@ -61,6 +61,12 @@ class AuthController extends Controller
 
             $user = self::findByEmail($request->email);
 
+            if ($user && !$user->has_password) {
+                throw ValidationException::withMessages([
+                    'email' => ['This account uses Google sign-in. Use "Continue with Google", then set a password on your Profile page if you also want to log in with your email.'],
+                ]);
+            }
+
             if (!$user || !Hash::check($request->password, $user->password)) {
                 throw ValidationException::withMessages([
                     'email' => ['The provided credentials are incorrect.']
@@ -119,8 +125,8 @@ class AuthController extends Controller
                 'email' => $info['email'],
                 'google_id' => $info['sub'],
                 'image_url' => $info['picture'] ?? null,
-                // Google users sign in without a password; a random one keeps the column filled
-                'password' => Hash::make(Str::random(40)),
+                // No password until the customer sets one from their profile
+                'password' => null,
                 'role' => 'user',
             ]);
         } elseif (!$user->google_id) {
