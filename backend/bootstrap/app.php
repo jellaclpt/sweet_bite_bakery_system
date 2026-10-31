@@ -14,9 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function () {
-            // Slow down password guessing and sign-up spam: 10 tries per minute per IP + email
+            // Slow down password guessing and sign-up spam: 10 tries per minute per IP + account
             RateLimiter::for('auth', function (Request $request) {
-                return Limit::perMinute(10)->by(strtolower((string) $request->input('email')).'|'.$request->ip());
+                $account = $request->input('login') ?? $request->input('username') ?? $request->input('email');
+
+                return Limit::perMinute(10)->by(strtolower(trim((string) $account)).'|'.$request->ip());
             });
 
             // Receipt uploads: generous for real customers, blocks scripted flooding

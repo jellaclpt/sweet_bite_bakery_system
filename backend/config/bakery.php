@@ -18,7 +18,9 @@ return [
     'open_hour' => (int) env('BAKERY_OPEN_HOUR', 8),
     'close_hour' => (int) env('BAKERY_CLOSE_HOUR', 18),
 
-    // Admin account created or updated on every deploy (see DatabaseSeeder). Set both on Render.
+    // Admin account created or updated on every deploy (see DatabaseSeeder).
+    // On Render set ADMIN_USERNAME and ADMIN_PASSWORD; ADMIN_EMAIL is optional.
+    'admin_username' => env('ADMIN_USERNAME'),
     'admin_email' => env('ADMIN_EMAIL'),
     'admin_password' => env('ADMIN_PASSWORD'),
 

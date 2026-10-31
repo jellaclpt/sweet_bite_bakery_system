@@ -3,17 +3,14 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import AdminSidebar from "./components/AdminSidebar";
-import AdminTopbar from "./components/AdminTopbar";
-import { useSidebar } from "../../context/SidebarContext";
 import { FiEdit, FiTrash2, FiX } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { getImageUrl } from "../../utils/imageUrl";
+import Select from "../../components/Select";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { collapsed, toggle } = useSidebar();
 
   useEffect(() => {
     if (!user) return;
@@ -303,20 +300,9 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-cream overflow-hidden">
-      <AdminSidebar />
-
-      {/* Right content */}
-      <div
-        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
-          collapsed ? "ml-0" : "lg:ml-64 ml-0"
-        }`}
-      >
-        {/* TOPBAR – FLUSH TO TOP */}
-        <AdminTopbar toggleSidebar={toggle} isSidebarOpen={!collapsed} />
-
-        {/* PAGE CONTENT - Scrollable */}
-        <div className="flex-1 p-6 overflow-y-auto">
+    // The sidebar and top bar come from AdminLayout, which stays on screen between admin pages
+    <>
+        <div>
           {/* HEADER */}
           <header className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
@@ -338,29 +324,31 @@ export default function AdminDashboard() {
                 className="w-56 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"
               />
 
-              <select
+              <Select
+                className="w-44"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand"
-                aria-label="Sort categories"
-              >
-                <option value="all">All categories</option>
-                <option value="cake">Cake</option>
-                <option value="bread">Bread</option>
-                <option value="pastry">Pastry</option>
-                <option value="cupcake">Cupcake</option>
-                <option value="cookies">Cookies</option>
-              </select>
+                aria-label="Filter by category"
+                options={[
+                  { value: "all", label: "All categories" },
+                  { value: "cake", label: "Cake" },
+                  { value: "bread", label: "Bread" },
+                  { value: "pastry", label: "Pastry" },
+                  { value: "cupcake", label: "Cupcake" },
+                  { value: "cookies", label: "Cookies" },
+                ]}
+              />
 
-              <select
+              <Select
+                className="w-52"
                 value={priceSort}
                 onChange={(e) => setPriceSort(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand"
                 aria-label="Sort by price"
-              >
-                <option value="asc">Price: lowest - highest</option>
-                <option value="desc">Price: highest - lowest</option>
-              </select>
+                options={[
+                  { value: "asc", label: "Price: lowest to highest" },
+                  { value: "desc", label: "Price: highest to lowest" },
+                ]}
+              />
             </div>
           </header>
 
@@ -519,7 +507,6 @@ export default function AdminDashboard() {
 
           {error && <div className="mt-4 text-red-500">{error}</div>}
         </div>
-      </div>
 
       {/* Edit Product Modal */}
       {editModalOpen && (
@@ -555,20 +542,15 @@ export default function AdminDashboard() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Category *
                   </label>
-                  <select
+                  <Select
                     name="category_id"
-                    value={editForm.category_id || ""}
+                    value={editForm.category_id ? String(editForm.category_id) : ""}
                     onChange={handleEditChange}
                     required
-                    className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                  >
-                    <option value="">Select category</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="Select category"
+                    aria-label="Category"
+                    options={categories.map((cat) => ({ value: String(cat.id), label: cat.name }))}
+                  />
                 </div>
 
                 {/* Image Upload */}
@@ -645,15 +627,16 @@ export default function AdminDashboard() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Availability
                   </label>
-                  <select
+                  <Select
                     name="is_available"
                     value={editForm.is_available}
                     onChange={handleEditChange}
-                    className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-                  >
-                    <option value="1">Available</option>
-                    <option value="0">Out of Stock</option>
-                  </select>
+                    aria-label="Availability"
+                    options={[
+                      { value: "1", label: "Available" },
+                      { value: "0", label: "Out of Stock" },
+                    ]}
+                  />
                 </div>
 
                 <div className="col-span-2">
@@ -742,7 +725,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
-

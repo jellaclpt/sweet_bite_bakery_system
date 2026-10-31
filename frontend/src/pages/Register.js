@@ -4,13 +4,13 @@ import api from "../api/api";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
-import { User, Phone, MapPin, Mail, Lock } from "lucide-react";
+import { User, AtSign, Phone, MapPin, Mail, Lock } from "lucide-react";
 import AuthLayout, { AuthField } from "../components/AuthLayout";
-import GoogleSignInButton from "../components/GoogleSignInButton";
 
 export default function Register() {
   const [form, setForm] = useState({
     name: "",
+    username: "",
     phone: "",
     address: "",
     email: "",
@@ -38,7 +38,7 @@ export default function Register() {
 
       // After registration, auto-login the user using email/password
       // (Assuming your login endpoint accepts email + password)
-      await login(form.email, form.password);
+      await login(form.username, form.password);
 
       toast.success("Account created. Welcome to Sweet Bite!");
       navigate("/"); // go to Home
@@ -87,6 +87,19 @@ export default function Register() {
           <AuthField label="Full Name" icon={User} placeholder="Juan Dela Cruz" autoComplete="name" {...field("name")} />
           <AuthField label="Phone Number" icon={Phone} type="tel" placeholder="09XX XXX XXXX" autoComplete="tel" {...field("phone")} />
         </div>
+        <AuthField
+          label="Username"
+          icon={AtSign}
+          placeholder="e.g. user_01"
+          autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
+          minLength={3}
+          maxLength={30}
+          pattern="[A-Za-z0-9._]{3,30}"
+          title="3 to 30 characters: letters, numbers, dots and underscores"
+          {...field("username")}
+        />
         <AuthField label="Address" icon={MapPin} placeholder="Street, barangay, town" autoComplete="street-address" {...field("address")} />
         <AuthField label="Email" icon={Mail} type="email" placeholder="you@example.com" autoComplete="email" {...field("email")} />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -103,7 +116,6 @@ export default function Register() {
         </button>
       </form>
 
-      <GoogleSignInButton mode="signup" />
     </AuthLayout>
   );
 }

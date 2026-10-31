@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FiX, FiImage, FiRefreshCw } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../../api/api";
-import AdminLayout from "./components/AdminLayout";
 import {
   formatLabel,
   formatPaymentMethod,
@@ -11,6 +10,7 @@ import {
   paymentStatusClass,
   peso,
 } from "../../utils/labels";
+import Select from "../../components/Select";
 
 const STATUS_OPTIONS = ["pending", "confirmed", "preparing", "ready", "completed", "cancelled"];
 
@@ -95,7 +95,7 @@ export default function AdminOrders() {
   };
 
   return (
-    <AdminLayout>
+    <>
       <header className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold text-brand-deep">Orders</h1>
@@ -193,17 +193,16 @@ export default function AdminOrders() {
                     )}
                   </td>
                   <td className="px-4 py-4">
-                    <select
+                    <Select
+                      size="sm"
+                      className="w-36"
                       value={STATUS_OPTIONS.includes(o.status) ? o.status : ""}
                       onChange={(e) => updateStatus(o, e.target.value)}
                       disabled={busyId === o.id}
-                      className="border border-line rounded-lg px-2.5 py-1.5 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand/30"
-                    >
-                      {!STATUS_OPTIONS.includes(o.status) && <option value="">{formatLabel(o.status)}</option>}
-                      {STATUS_OPTIONS.map((s) => (
-                        <option key={s} value={s}>{formatLabel(s)}</option>
-                      ))}
-                    </select>
+                      aria-label={`Status of order #${o.id}`}
+                      placeholder={formatLabel(o.status)}
+                      options={STATUS_OPTIONS.map((s) => ({ value: s, label: formatLabel(s) }))}
+                    />
                   </td>
                   <td className="px-4 py-4 text-right whitespace-nowrap">
                     {o.payment_status === "deposit_submitted" && (
@@ -331,6 +330,6 @@ export default function AdminOrders() {
           </div>
         </div>
       )}
-    </AdminLayout>
+    </>
   );
 }

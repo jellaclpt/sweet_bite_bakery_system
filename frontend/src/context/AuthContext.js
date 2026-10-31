@@ -86,8 +86,9 @@ export function AuthProvider({ children }) {
   // -------------------------------------------------------
   //  LOGIN (NOW FETCHES FRESH USER DATA)
   // -------------------------------------------------------
-  async function login(email, password) {
-    const response = await api.post("/login", { email, password });
+  async function login(username, password) {
+    // "login" accepts a username or an email
+    const response = await api.post("/login", { login: username, password });
 
     const userData = normalizeUser(response.data.user || response.data.data);
     const token = response.data.token;
@@ -116,26 +117,6 @@ export function AuthProvider({ children }) {
 
     console.log("✅ Login successful. User role:", userData.role);
     return userData;
-  }
-
-  // -------------------------------------------------------
-  //  SIGN IN / SIGN UP WITH GOOGLE
-  //  `credential` is the ID token from Google's sign-in button
-  // -------------------------------------------------------
-  async function loginWithGoogle(credential) {
-    const response = await api.post("/auth/google", { credential });
-    const userData = normalizeUser(response.data.user);
-    const token = response.data.token;
-
-    if (!userData || !token) {
-      throw new Error("Invalid Google sign-in response");
-    }
-
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("token", token);
-    setUser(userData);
-
-    return { user: userData, isNew: Boolean(response.data.is_new) };
   }
 
   // -------------------------------------------------------
@@ -179,7 +160,6 @@ export function AuthProvider({ children }) {
         user,
         setUser: updateUser, // 🔥 used by Profile.js
         login,
-        loginWithGoogle,
         logout,
         refreshUser, // 🔥 call this after saving profile
         loading,

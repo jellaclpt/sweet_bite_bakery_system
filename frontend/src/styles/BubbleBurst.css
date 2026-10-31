@@ -1,0 +1,67 @@
+/* Bubbly click effect (see components/bubbleBurst.js) */
+
+.bubble-layer {
+  position: fixed;
+  pointer-events: none;
+  z-index: 60;
+  overflow: visible;
+}
+
+.bubble {
+  position: absolute;
+  top: 50%;
+  width: var(--size);
+  height: var(--size);
+  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+  border-radius: 9999px;
+  /* A soft highlight so they read as bubbles, not dots */
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.85), var(--color) 55%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+  opacity: 0;
+  animation: bubble-fly var(--duration) cubic-bezier(0.2, 0.7, 0.3, 1) var(--delay) forwards;
+}
+
+@keyframes bubble-fly {
+  0% {
+    transform: translate(0, 0) scale(0.2);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  70% {
+    transform: translate(var(--x), var(--y)) scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    /* bubbles drift up a little as they fade */
+    transform: translate(var(--x), calc(var(--y) - 10px)) scale(0.4);
+    opacity: 0;
+  }
+}
+
+/* The clicked item squishes, then bounces back */
+.bubble-pop {
+  animation: bubble-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes bubble-pop {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(0.94);
+  }
+  65% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble-pop {
+    animation: none;
+  }
+}

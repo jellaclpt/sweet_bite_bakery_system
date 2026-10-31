@@ -20,6 +20,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
         'google_id',
         'password',
@@ -61,6 +62,14 @@ class User extends Authenticatable
 
     // Emails are compared in lowercase everywhere (PostgreSQL treats "A@x.com" and "a@x.com" as different)
     protected function email(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            set: fn ($value) => is_string($value) ? strtolower(trim($value)) : $value,
+        );
+    }
+
+    // Usernames are stored in lowercase, so "Carmen" and "carmen" are the same account
+    protected function username(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             set: fn ($value) => is_string($value) ? strtolower(trim($value)) : $value,

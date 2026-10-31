@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api/api";
-import AdminSidebar from "./components/AdminSidebar";
-import AdminTopbar from "./components/AdminTopbar";
 import { FiTrash, FiUpload } from "react-icons/fi";
 import toast from "react-hot-toast";
-import { useSidebar } from "../../context/SidebarContext";
+import Select from "../../components/Select";
 
 export default function ProductManagement() {
-  const { collapsed, toggle } = useSidebar();
   const [form, setForm] = useState({
     name: "",
     category_id: "",
@@ -183,17 +180,8 @@ export default function ProductManagement() {
   };
 
   return (
-    <div className="flex h-screen bg-cream overflow-hidden">
-      <AdminSidebar />
-
-      <div
-        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
-          collapsed ? "ml-0" : "lg:ml-64 ml-0"
-        }`}
-      >
-        <AdminTopbar toggleSidebar={toggle} isSidebarOpen={!collapsed} />
-
-        <div className="flex-1 p-6 overflow-y-auto">
+    // The sidebar and top bar come from AdminLayout, which stays on screen between admin pages
+    <div>
           <header className="mb-6">
             <h1 className="text-3xl font-bold text-brand-deep">Add Product</h1>
             <p className="text-sm text-gray-500">Create a new item for the customer menu</p>
@@ -219,26 +207,16 @@ export default function ProductManagement() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Category *
               </label>
-              <select
+              <Select
                 name="category_id"
-                value={form.category_id || ""}
-                onChange={(e) =>
-                  setForm({ ...form, category_id: e.target.value })
-                }
+                value={form.category_id ? String(form.category_id) : ""}
+                onChange={(e) => setForm({ ...form, category_id: e.target.value })}
                 required
-                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-              >
-                <option value="">Select category</option>
-                {orderedCategories.length === 0 ? (
-                  <option disabled>Loading categories...</option>
-                ) : (
-                  orderedCategories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))
-                )}
-              </select>
+                aria-label="Category"
+                placeholder={orderedCategories.length === 0 ? "Loading categories..." : "Select category"}
+                disabled={orderedCategories.length === 0}
+                options={orderedCategories.map((cat) => ({ value: String(cat.id), label: cat.name }))}
+              />
             </div>
 
             {/* Image Upload - Drag & Drop Style */}
@@ -316,18 +294,16 @@ export default function ProductManagement() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Availability
               </label>
-              <select
+              <Select
                 name="is_available"
                 value={form.is_available ? "1" : "0"}
-                onChange={(e) =>
-                  setForm({ ...form, is_available: e.target.value === "1" })
-                }
-                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
-              >
-                <option value="">select status</option>
-                <option value="1">Available</option>
-                <option value="0">Out of Stock</option>
-              </select>
+                onChange={(e) => setForm({ ...form, is_available: e.target.value === "1" })}
+                aria-label="Availability"
+                options={[
+                  { value: "1", label: "Available" },
+                  { value: "0", label: "Out of Stock" },
+                ]}
+              />
             </div>
 
             <div className="col-span-2">
@@ -372,8 +348,6 @@ export default function ProductManagement() {
             </button>
           </div>
         </form>
-        </div>
-      </div>
     </div>
   );
 }

@@ -3,15 +3,14 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
-import { Mail, Lock } from "lucide-react";
+import { User, Lock } from "lucide-react";
 import AuthLayout, { AuthField } from "../components/AuthLayout";
-import GoogleSignInButton from "../components/GoogleSignInButton";
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ login: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -25,7 +24,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const loggedInUser = await login(form.email, form.password);
+      const loggedInUser = await login(form.login, form.password);
 
       console.log("✅ Login successful. User:", loggedInUser);
       toast.success(`Welcome back, ${loggedInUser.name}!`);
@@ -84,14 +83,15 @@ export default function Login() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <AuthField
-          label="Email"
-          icon={Mail}
-          type="email"
-          name="email"
-          value={form.email}
+          label="Username or email"
+          icon={User}
+          name="login"
+          value={form.login}
           onChange={handleChange}
-          placeholder="you@example.com"
-          autoComplete="email"
+          placeholder="e.g. user_01 or you@example.com"
+          autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
           required
           autoFocus
         />
@@ -116,7 +116,6 @@ export default function Login() {
         </button>
       </form>
 
-      <GoogleSignInButton mode="signin" />
     </AuthLayout>
   );
 }
