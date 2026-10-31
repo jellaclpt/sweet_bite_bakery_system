@@ -36,8 +36,10 @@ php artisan view:clear || true
 # This prevents stale config cache from blocking environment variables
 
 # Run database migrations on startup
+# If migrations fail, stop here: Render then keeps the previous version running
+# instead of starting new code against an old database layout.
 echo "Running database migrations..."
-php artisan migrate --force || echo "Warning: Database migration failed"
+php artisan migrate --force
 
 # Run seeders to populate initial data
 echo "Seeding database..."
@@ -51,4 +53,6 @@ echo "Debug mode: ${APP_DEBUG:-false}"
 echo "Starting Laravel server on port: $PORT"
 
 # Start Laravel server
+# Several PHP workers, so one slow request (e.g. a receipt upload) doesn't block everyone else
+export PHP_CLI_SERVER_WORKERS=${PHP_CLI_SERVER_WORKERS:-4}
 exec php artisan serve --host=0.0.0.0 --port=$PORT

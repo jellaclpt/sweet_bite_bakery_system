@@ -16,6 +16,9 @@ class OrderItem extends Model
 
     protected $casts = [
         'customizations' => 'array', // so JSON becomes array automatically
+        'unit_price' => 'decimal:2',
+        'total_price' => 'decimal:2',
+        'quantity' => 'integer',
     ];
 
     public function order()

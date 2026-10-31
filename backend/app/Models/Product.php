@@ -18,6 +18,11 @@ class Product extends Model
         'image_url',
     ];
 
+    protected $casts = [
+        'is_available' => 'boolean',
+        'base_price' => 'decimal:2',
+    ];
+
     public function category()
     {
         return $this->belongsTo(Category::class);

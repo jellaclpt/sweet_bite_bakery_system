@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // ✅ Add this line
 
 class NotificationController extends Controller
 {
-    // 🔔 Get all notifications for a user
-    public function index($user_id)
+    // GET /notifications/{user_id} (that user only): newest first
+    public function index(Request $request, $user_id)
     {
-        $user = User::findOrFail($user_id);
-        return response()->json($user->notifications);
+        if ((int) $user_id !== (int) $request->user()->id) {
+            abort(403, 'You can only view your own notifications.');
+        }
+
+        return response()->json($request->user()->notifications()->latest()->get());
     }
 
-    // ✅ Mark a notification as read
-    public function markAsRead($id)
+    // PATCH /notifications/{id}/read (only your own; anyone else's looks like it doesn't exist)
+    public function markAsRead(Request $request, $id)
     {
-        $notification = \Illuminate\Notifications\DatabaseNotification::find($id);
+        $notification = $request->user()->notifications()->whereKey($id)->first();
 
         if (!$notification) {
             return response()->json(['message' => 'Notification not found'], 404);
@@ -28,5 +29,4 @@ class NotificationController extends Controller
 
         return response()->json(['message' => 'Notification marked as read']);
     }
-
 }

@@ -3,202 +3,113 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Support\PublicFiles;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    // =======================================================
-    // LIST PRODUCTS (with filters + search + pagination)
-    // =======================================================
+    // GET /products?search=&category=&per_page=&page=
+    // Public. Returns Laravel pagination: { data: [...], current_page, last_page, total, ... }
     public function index(Request $request)
     {
-        $query = Product::with('category');
-
-        // Filter by category name
-        if ($request->has('category') && $request->category !== 'all') {
-            $query->whereHas('category', function ($q) use ($request) {
-                $q->where('name', $request->category);
-            });
-        }
-
-        // Search by product name
-        if ($request->has('search') && $request->search !== '') {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        return response()->json($query->paginate(10));
-    }
-
-    // =======================================================
-    // SHOW SINGLE PRODUCT
-    // =======================================================
-    public function show($id)
-    {
-        return response()->json(
-            Product::with('category')->findOrFail($id)
-        );
-    }
-
-    // =======================================================
-    // CREATE PRODUCT (with IMAGE upload)
-    // =======================================================
-    public function store(Request $request)
-    {
-        // Validate input
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'category_id' => 'required|integer|exists:categories,id',
-            'base_price' => 'required|numeric|min:0',
-            'is_available' => 'required|boolean',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+        $request->validate([
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'page' => 'nullable|integer|min:1',
         ]);
 
-        try {
-            // Handle image upload
-            $imageUrl = null;
-            if ($request->hasFile('image')) {
-                $file = $request->file('image');
-                $filename = time() . '_' . $file->getClientOriginalName();
-                $path = $file->storeAs('products', $filename, 'public');
-                
-                // Store the full URL so frontend can render images regardless of origin
-                $imageUrl = url('storage/products/' . $filename);
-                
-                \Log::info('Image stored successfully', [
-                    'filename' => $filename,
-                    'stored_path' => $imageUrl
-                ]);
-            }
+        $query = Product::with('category')->orderBy('name');
 
-            // Create product
-            $product = Product::create([
-                'name' => $validated['name'],
-                'category_id' => $validated['category_id'],
-                'base_price' => $validated['base_price'],
-                'is_available' => $validated['is_available'],
-                'description' => $validated['description'] ?? null,
-                'image_url' => $imageUrl,
-            ]);
-
-            \Log::info('Product created successfully', [
-                'id' => $product->id,
-                'name' => $product->name,
-                'image_url' => $product->image_url
-            ]);
-
-            return response()->json([
-                'message' => 'Product created successfully',
-                'data' => $product->load('category')
-            ], 201);
-
-        } catch (\Exception $e) {
-            \Log::error('Product creation failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return response()->json([
-                'message' => 'Failed to create product',
-                'error' => $e->getMessage()
-            ], 500);
+        // Category filter by name, case-insensitive ("cake" matches "Cake")
+        $category = trim((string) $request->query('category', ''));
+        if ($category !== '' && strtolower($category) !== 'all') {
+            $query->whereHas('category', fn ($q) => $q->whereRaw('LOWER(name) = ?', [strtolower($category)]));
         }
+
+        // Name search, case-insensitive on both SQLite and PostgreSQL
+        $search = trim((string) $request->query('search', ''));
+        if ($search !== '') {
+            $like = '%' . addcslashes(strtolower($search), '%_\\') . '%';
+            $query->whereRaw('LOWER(name) LIKE ?', [$like]);
+        }
+
+        // The whole menu fits on one page by default (it used to stop at 10 products)
+        return response()->json($query->paginate((int) $request->query('per_page', 100)));
     }
 
-    // =======================================================
-    // UPDATE PRODUCT (with image replace)
-    // =======================================================
+    // GET /products/{id}
+    public function show($id)
+    {
+        return response()->json(Product::with('category')->findOrFail($id));
+    }
+
+    // POST /products (admin, multipart)
+    public function store(Request $request)
+    {
+        $validated = $request->validate($this->rules());
+
+        $product = Product::create([
+            'name' => trim($validated['name']),
+            'category_id' => $validated['category_id'],
+            'base_price' => $validated['base_price'],
+            'is_available' => $request->boolean('is_available'),
+            'description' => $validated['description'] ?? null,
+            'image_url' => $request->hasFile('image') ? PublicFiles::store($request->file('image'), 'products') : null,
+        ]);
+
+        return response()->json([
+            'message' => 'Product created successfully',
+            'data' => $product->load('category'),
+        ], 201);
+    }
+
+    // POST or PUT /products/{id} (admin, multipart). Send delete_image=1 to remove the photo.
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
+        $validated = $request->validate($this->rules());
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'category_id' => 'required|integer|exists:categories,id',
-            'base_price' => 'required|numeric|min:0',
-            'is_available' => 'required',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
-        ]);
-
-        // Handle image deletion if requested
-        if ($request->input('delete_image')) {
-            if ($product->image_url) {
-                $old = $product->image_url;
-                $parsed = parse_url($old, PHP_URL_PATH) ?: $old;
-                $parsed = ltrim($parsed, '/');
-                if (strpos($parsed, 'storage/') === 0) {
-                    $oldRelative = substr($parsed, strlen('storage/'));
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($oldRelative);
-                }
-            }
-            $imageUrl = null;
-        }
-
-        // Handle image upload if present
         if ($request->hasFile('image')) {
-            // Delete old image if exists (supports full URL or relative storage path)
-            if ($product->image_url) {
-                $old = $product->image_url;
-                $parsed = parse_url($old, PHP_URL_PATH) ?: $old;
-                $parsed = ltrim($parsed, '/');
-                if (strpos($parsed, 'storage/') === 0) {
-                    $oldRelative = substr($parsed, strlen('storage/'));
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($oldRelative);
-                }
-            }
-
-            // Store new image
-            $file = $request->file('image');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('products', $filename, 'public');
-            
-            // Store full URL
-            $imageUrl = url('storage/products/' . $filename);
-
-            \Log::info('Product image updated', [
-                'product_id' => $product->id,
-                'new_path' => $imageUrl
-            ]);
+            PublicFiles::delete($product->image_url);
+            $product->image_url = PublicFiles::store($request->file('image'), 'products');
+        } elseif ($request->boolean('delete_image')) {
+            PublicFiles::delete($product->image_url);
+            $product->image_url = null;
         }
 
-        // Update product fields
-        $product->name = $validated['name'];
+        $product->name = trim($validated['name']);
         $product->category_id = $validated['category_id'];
         $product->base_price = $validated['base_price'];
-        $product->is_available = ($validated['is_available'] == "1" || $validated['is_available'] == 1) ? 1 : 0;
+        $product->is_available = $request->boolean('is_available');
         $product->description = $validated['description'] ?? null;
-        $product->image_url = $imageUrl ?? $product->image_url;
-
         $product->save();
 
         return response()->json([
             'message' => 'Product updated successfully',
-            'data' => $product->fresh('category')
+            'data' => $product->fresh('category'),
         ]);
     }
 
-    // =======================================================
-    // DELETE PRODUCT (also delete image)
-    // =======================================================
+    // DELETE /products/{id} (admin). Past orders keep the item's name and price.
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
 
-        if ($product->image_url) {
-            $parsed = parse_url($product->image_url, PHP_URL_PATH) ?: $product->image_url;
-            $parsed = ltrim($parsed, '/');
-            if (strpos($parsed, 'storage/') === 0) {
-                $oldRelative = substr($parsed, strlen('storage/'));
-                Storage::disk('public')->delete($oldRelative);
-            }
-        }
-
+        PublicFiles::delete($product->image_url);
         $product->delete();
 
-        return response()->json([
-            'message' => 'Product deleted successfully'
-        ]);
+        return response()->json(['message' => 'Product deleted successfully']);
+    }
+
+    private function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|integer|exists:categories,id',
+            'base_price' => 'required|numeric|min:0|max:1000000',
+            'is_available' => 'required|boolean',
+            'description' => 'nullable|string|max:2000',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'delete_image' => 'nullable|boolean',
+        ];
     }
 }

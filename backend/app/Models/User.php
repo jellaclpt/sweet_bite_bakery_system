@@ -45,6 +45,24 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    // Emails are compared in lowercase everywhere (PostgreSQL treats "A@x.com" and "a@x.com" as different)
+    protected function email(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            set: fn ($value) => is_string($value) ? strtolower(trim($value)) : $value,
+        );
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
     protected function casts(): array
     {
         return [
