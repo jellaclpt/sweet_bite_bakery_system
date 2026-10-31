@@ -5,9 +5,18 @@ import { useCart } from "../context/CartContext";
 import { getImageUrl } from "../utils/imageUrl";
 import toast from "react-hot-toast";
 import { Minus, Plus } from "lucide-react";
+import Select from "../components/Select";
 
 // Categories appear in this order; any new category goes after them
 const CATEGORY_ORDER = ["cake", "bread", "pastry", "cupcake", "cookies"];
+
+const SORT_OPTIONS = [
+  { value: "recommended", label: "Recommended" },
+  { value: "name-asc", label: "Name A to Z" },
+  { value: "name-desc", label: "Name Z to A" },
+  { value: "price-asc", label: "Lowest price" },
+  { value: "price-desc", label: "Highest price" },
+];
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -15,6 +24,7 @@ export default function Products() {
   const { addToCart } = useCart();
   const [quantities, setQuantities] = useState({});
   const [activeCategory, setActiveCategory] = useState("all");
+  const [sortBy, setSortBy] = useState("recommended");
 
   // ✅ Fetch products from backend
   useEffect(() => {
@@ -63,8 +73,26 @@ export default function Products() {
       .map(([name, items]) => ({ name, items }));
   }, [products]);
 
-  const visibleGroups =
-    activeCategory === "all" ? groups : groups.filter((g) => g.name === activeCategory);
+  // One flat list: every product ("All") or just the chosen category, in the chosen order
+  const visibleProducts = useMemo(() => {
+    const list = groups
+      .filter((g) => activeCategory === "all" || g.name === activeCategory)
+      .flatMap((g) => g.items);
+    const price = (p) => Number(p.base_price) || 0;
+    const byName = (a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+    switch (sortBy) {
+      case "name-asc":
+        return [...list].sort(byName);
+      case "name-desc":
+        return [...list].sort((a, b) => byName(b, a));
+      case "price-asc":
+        return [...list].sort((a, b) => price(a) - price(b) || byName(a, b));
+      case "price-desc":
+        return [...list].sort((a, b) => price(b) - price(a) || byName(a, b));
+      default:
+        return list; // cakes first, then breads, pastries, cupcakes, cookies
+    }
+  }, [groups, activeCategory, sortBy]);
 
   const renderCard = (product) => {
     const unavailable = !product.is_available || product.is_available === 0;
@@ -169,7 +197,8 @@ export default function Products() {
         {groups.length > 0 && (
           // Category filter: scrolls sideways on phones, stays under the navbar while scrolling
           <div className="sticky top-0 md:top-16 z-20 -mx-4 px-4 sm:mx-0 sm:px-0 py-2 mb-4 sm:mb-6 bg-cream/95 backdrop-blur">
-            <div className="flex gap-2 overflow-x-auto no-scrollbar" role="tablist" aria-label="Product categories">
+            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex-1 min-w-0 flex gap-2 overflow-x-auto no-scrollbar" role="tablist" aria-label="Product categories">
               {[{ name: "all", label: "All", count: products.length }, ...groups.map((g) => ({ name: g.name, label: g.name, count: g.items.length }))].map(
                 ({ name, label, count }) => {
                   const active = activeCategory === name;
@@ -196,6 +225,15 @@ export default function Products() {
                 }
               )}
             </div>
+            <Select
+              className="shrink-0 w-36 sm:w-56"
+              size="sm"
+              aria-label="Sort products"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              options={SORT_OPTIONS}
+            />
+            </div>
           </div>
         )}
 
@@ -204,22 +242,7 @@ export default function Products() {
             No products available right now. Please check back soon.
           </div>
         ) : (
-          <div className="space-y-8 sm:space-y-10">
-            {visibleGroups.map((group) => (
-              <section key={group.name} aria-labelledby={`cat-${group.name}`}>
-                <h2
-                  id={`cat-${group.name}`}
-                  className="flex items-baseline gap-2 text-lg sm:text-2xl font-bold text-brand-deep mb-3 sm:mb-4"
-                >
-                  {group.name}
-                  <span className="text-xs sm:text-sm font-normal text-gray-400">
-                    {group.items.length} {group.items.length === 1 ? "item" : "items"}
-                  </span>
-                </h2>
-                <div className={gridClass}>{group.items.map(renderCard)}</div>
-              </section>
-            ))}
-          </div>
+          <div className={gridClass}>{visibleProducts.map(renderCard)}</div>
         )}
       </div>
     </div>
