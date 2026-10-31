@@ -3,6 +3,7 @@ import api from "../../api/api";
 import { FiTrash, FiUpload } from "react-icons/fi";
 import toast from "react-hot-toast";
 import Select from "../../components/Select";
+import { MAX_UPLOAD_BYTES, shrinkImage } from "../../utils/shrinkImage";
 
 export default function ProductManagement() {
   const [form, setForm] = useState({
@@ -57,7 +58,7 @@ export default function ProductManagement() {
     return CATEGORY_ORDER.map((n) => byName.get(n)).filter(Boolean);
   }, [categories]);
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value, files } = e.target;
 
     if (files && files.length > 0) {
@@ -69,20 +70,20 @@ export default function ProductManagement() {
         return;
       }
       
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
+      // Big phone photos are resized here, so only truly huge files are refused
+      const image = await shrinkImage(file, { maxDimension: 1600 });
+      if (image.size > MAX_UPLOAD_BYTES) {
         toast.error("Image size must be less than 5MB");
         return;
       }
-      
-      console.log("Image selected:", file.name, "Size:", file.size, "Type:", file.type);
-      setForm({ ...form, image: file });
-      setPreview(URL.createObjectURL(file));
+
+      setForm((prev) => ({ ...prev, image }));
+      setPreview(URL.createObjectURL(image));
       return;
     }
 
     // For non-file inputs, update normally
-    setForm({ ...form, [name]: value });
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {

@@ -19,6 +19,10 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# PHP's built-in limit is 2 MB per upload, which rejects most phone photos.
+# The app itself checks for 5 MB, so let PHP accept a little more than that.
+RUN printf "upload_max_filesize=10M\npost_max_size=12M\nmemory_limit=256M\n" > /usr/local/etc/php/conf.d/uploads.ini
+
 # Set working directory
 WORKDIR /var/www/html
 

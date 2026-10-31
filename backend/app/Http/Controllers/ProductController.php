@@ -45,7 +45,7 @@ class ProductController extends Controller
     // POST /products (admin, multipart)
     public function store(Request $request)
     {
-        $validated = $request->validate($this->rules());
+        $validated = $request->validate($this->rules(), self::IMAGE_MESSAGES);
 
         $product = Product::create([
             'name' => trim($validated['name']),
@@ -66,7 +66,7 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
-        $validated = $request->validate($this->rules());
+        $validated = $request->validate($this->rules(), self::IMAGE_MESSAGES);
 
         // Upload the new photo first; the old one is removed only after everything is saved,
         // so a failed upload never leaves the product without a picture
@@ -105,6 +105,13 @@ class ProductController extends Controller
 
         return response()->json(['message' => 'Product deleted successfully']);
     }
+
+    private const IMAGE_MESSAGES = [
+        'image.uploaded' => 'That photo is too large to upload. Please choose one under 5 MB.',
+        'image.max' => 'That photo is too large. Please choose one under 5 MB.',
+        'image.mimes' => 'Please choose a JPG, PNG or WEBP photo.',
+        'image.image' => 'Please choose a JPG, PNG or WEBP photo.',
+    ];
 
     private function rules(): array
     {
