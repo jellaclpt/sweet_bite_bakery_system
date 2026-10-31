@@ -5,6 +5,7 @@ import { X, Copy, Check, Upload, Smartphone } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../api/api";
 import { peso } from "../utils/labels";
+import { MAX_UPLOAD_BYTES, shrinkImage } from "../utils/shrinkImage";
 
 export default function PayDepositModal({ order, settings, onClose, onPaid }) {
   const [reference, setReference] = useState(order.payment_reference || "");
@@ -17,9 +18,16 @@ export default function PayDepositModal({ order, settings, onClose, onPaid }) {
 
   useEffect(() => () => preview && URL.revokeObjectURL(preview), [preview]);
 
-  const pickFile = (e) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
+  const pickFile = async (e) => {
+    const picked = e.target.files?.[0];
+    if (!picked) return;
+    // Keep receipts sharp enough to read the reference number, but small enough to upload
+    const f = await shrinkImage(picked, { maxDimension: 2000, quality: 0.9 });
+    if (f.size > MAX_UPLOAD_BYTES) {
+      setError("That image is larger than 5 MB. Please send a screenshot instead.");
+      return;
+    }
+    setError(null);
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };

@@ -39,6 +39,11 @@ class DepositController extends Controller
         $request->validate([
             'payment_reference' => 'required|string|max:100',
             'proof' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ], [
+            'proof.uploaded' => 'That photo is too large to upload. Please send a screenshot or a photo under 5 MB.',
+            'proof.max' => 'That photo is too large. Please send a screenshot or a photo under 5 MB.',
+            'proof.mimes' => 'Please choose a JPG, PNG or WEBP photo.',
+            'proof.image' => 'Please choose a JPG, PNG or WEBP photo.',
         ]);
 
         // Resubmitting replaces the earlier receipt (removed only once the new one is saved)

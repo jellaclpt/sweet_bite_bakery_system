@@ -7,6 +7,7 @@ import { FiEdit, FiSearch, FiTrash2, FiX } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { getImageUrl } from "../../utils/imageUrl";
 import Select from "../../components/Select";
+import { MAX_UPLOAD_BYTES, shrinkImage } from "../../utils/shrinkImage";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -178,7 +179,7 @@ export default function AdminDashboard() {
   };
 
   // Handle Edit Form Change
-  const handleEditChange = (e) => {
+  const handleEditChange = async (e) => {
     const { name, value, files } = e.target;
 
     if (files && files.length > 0) {
@@ -188,18 +189,17 @@ export default function AdminDashboard() {
         toast.error("Please select a valid image file");
         return;
       }
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
+      // Big phone photos are resized here, so only truly huge files are refused
+      const image = await shrinkImage(file, { maxDimension: 1600 });
+      if (image.size > MAX_UPLOAD_BYTES) {
         toast.error("Image size must be less than 5MB");
         return;
       }
-      setEditForm({ ...editForm, image: file });
-      setEditPreview(URL.createObjectURL(file));
-    } else if (name === "is_available") {
-      // Always store as string "1" or "0"
-      setEditForm({ ...editForm, is_available: value });
+      setEditForm((prev) => ({ ...prev, image }));
+      setEditPreview(URL.createObjectURL(image));
     } else {
-      setEditForm({ ...editForm, [name]: value });
+      // is_available is stored as the string "1" or "0"
+      setEditForm((prev) => ({ ...prev, [name]: value }));
     }
   };
 

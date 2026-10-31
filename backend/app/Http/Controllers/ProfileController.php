@@ -18,6 +18,11 @@ class ProfileController extends Controller
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+        ], [
+            'image.uploaded' => 'That photo is too large to upload. Please choose one under 5 MB.',
+            'image.max' => 'That photo is too large. Please choose one under 5 MB.',
+            'image.mimes' => 'Please choose a JPG, PNG or WEBP photo.',
+            'image.image' => 'Please choose a JPG, PNG or WEBP photo.',
         ]);
 
         $user->name = trim($validated['name']);

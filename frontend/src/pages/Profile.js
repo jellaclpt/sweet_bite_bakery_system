@@ -6,6 +6,7 @@ import api from "../api/api";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import { getImageUrl } from "../utils/imageUrl";
+import { MAX_UPLOAD_BYTES, shrinkImage } from "../utils/shrinkImage";
 
 export default function Profile() {
   const { user, setUser } = useAuth(); // useAuth must provide setUser (updateUser)
@@ -62,7 +63,7 @@ export default function Profile() {
   }, [user]);
 
   // input handler (handles file inputs too)
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value, files } = e.target;
     if (files && files[0]) {
       const file = files[0];
@@ -71,12 +72,14 @@ export default function Profile() {
         toast.error("Please select an image file (jpg, png).");
         return;
       }
-      if (file.size > 5 * 1024 * 1024) {
+      // Phone photos are often 3 to 10 MB; a profile photo only needs to be small
+      const image = await shrinkImage(file, { maxDimension: 800 });
+      if (image.size > MAX_UPLOAD_BYTES) {
         toast.error("Image must be smaller than 5MB.");
         return;
       }
-      setForm((p) => ({ ...p, image: file }));
-      setPreview(URL.createObjectURL(file));
+      setForm((p) => ({ ...p, image }));
+      setPreview(URL.createObjectURL(image));
     } else {
       setForm((p) => ({ ...p, [name]: value }));
     }
