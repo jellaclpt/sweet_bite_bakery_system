@@ -1,16 +1,20 @@
 // src/pages/Products.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import api from "../api/api";
 import { useCart } from "../context/CartContext";
 import { getImageUrl } from "../utils/imageUrl";
 import toast from "react-hot-toast";
 import { Minus, Plus } from "lucide-react";
 
+// Categories appear in this order; any new category goes after them
+const CATEGORY_ORDER = ["cake", "bread", "pastry", "cupcake", "cookies"];
+
 export default function Products() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
   const [quantities, setQuantities] = useState({});
+  const [activeCategory, setActiveCategory] = useState("all");
 
   // ✅ Fetch products from backend
   useEffect(() => {
@@ -42,13 +46,107 @@ export default function Products() {
     toast.success(`${product.name} added to cart`);
   };
 
+  // Group products by category, in the bakery's usual order
+  const groups = useMemo(() => {
+    const map = new Map();
+    for (const product of products) {
+      const name = product.category?.name || "Other";
+      if (!map.has(name)) map.set(name, []);
+      map.get(name).push(product);
+    }
+    const rank = (name) => {
+      const i = CATEGORY_ORDER.indexOf(name.toLowerCase());
+      return i === -1 ? CATEGORY_ORDER.length : i;
+    };
+    return [...map.entries()]
+      .sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b))
+      .map(([name, items]) => ({ name, items }));
+  }, [products]);
+
+  const visibleGroups =
+    activeCategory === "all" ? groups : groups.filter((g) => g.name === activeCategory);
+
+  const renderCard = (product) => {
+    const unavailable = !product.is_available || product.is_available === 0;
+    const qty = quantities[product.id] || 1;
+    return (
+      <div
+        key={product.id}
+        className={`relative bg-white rounded-xl sm:rounded-2xl border border-line shadow-sm p-2 sm:p-4 flex flex-col transition ${
+          unavailable ? "opacity-70" : "hover:shadow-md hover:-translate-y-0.5"
+        }`}
+      >
+        <img
+          src={getImageUrl(product.image_url)}
+          alt={product.name}
+          className={`w-full aspect-[4/3] sm:aspect-auto sm:h-44 object-cover rounded-lg sm:rounded-xl mb-2 sm:mb-4 ${
+            unavailable ? "grayscale" : ""
+          }`}
+        />
+
+        {unavailable && (
+          <span className="absolute top-3.5 right-3.5 sm:top-6 sm:right-6 bg-white/95 text-red-600 text-[10px] sm:text-xs font-semibold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-sm">
+            Out of Stock
+          </span>
+        )}
+
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm sm:text-lg font-semibold text-gray-800 leading-snug line-clamp-2">
+            {product.name}
+          </h3>
+          {product.description && (
+            <p className="hidden sm:block text-sm text-gray-500 mt-1 line-clamp-2">{product.description}</p>
+          )}
+          <p className="text-sm sm:text-lg font-bold text-brand mt-0.5 sm:mt-1">
+            ₱{Number(product.base_price).toFixed(2)}
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2 sm:mt-4 gap-1.5 sm:gap-2">
+          <div className="flex items-center justify-between sm:justify-start rounded-full border border-line">
+            <button
+              type="button"
+              aria-label={`Decrease quantity of ${product.name}`}
+              className="w-8 h-7 sm:h-9 flex items-center justify-center text-gray-600 hover:text-brand disabled:opacity-40"
+              onClick={() => handleQuantityChange(product.id, -1)}
+              disabled={unavailable || qty <= 1}
+            >
+              <Minus size={14} />
+            </button>
+            <span className="w-6 text-center text-xs sm:text-sm font-medium">{qty}</span>
+            <button
+              type="button"
+              aria-label={`Increase quantity of ${product.name}`}
+              className="w-8 h-7 sm:h-9 flex items-center justify-center text-gray-600 hover:text-brand disabled:opacity-40"
+              onClick={() => handleQuantityChange(product.id, +1)}
+              disabled={unavailable}
+            >
+              <Plus size={14} />
+            </button>
+          </div>
+
+          <button
+            type="button"
+            className="sm:flex-1 whitespace-nowrap bg-brand hover:bg-brand-hover text-white text-xs sm:text-sm font-semibold px-3 py-1.5 sm:py-2.5 rounded-full transition disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
+            onClick={() => handleAddToCart(product)}
+            disabled={unavailable}
+          >
+            {unavailable ? "Unavailable" : "Add to Cart"}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const gridClass = "grid grid-cols-2 min-[480px]:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6";
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-cream px-6 lg:px-10 pt-6 pb-10">
-        <div className="max-w-screen-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div className="min-h-screen bg-cream px-4 sm:px-6 lg:px-10 pt-4 sm:pt-6 pb-10">
+        <div className={`max-w-screen-2xl mx-auto ${gridClass}`}>
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl p-4 shadow-sm border border-line animate-pulse">
-              <div className="w-full h-40 rounded-xl mb-4 bg-sand"></div>
+            <div key={i} className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-line animate-pulse">
+              <div className="w-full aspect-[4/3] sm:aspect-auto sm:h-40 rounded-xl mb-4 bg-sand"></div>
               <div className="w-3/4 h-4 rounded mb-2 bg-line"></div>
               <div className="w-1/2 h-4 rounded bg-line"></div>
             </div>
@@ -59,94 +157,70 @@ export default function Products() {
   }
 
   return (
-    <div className="min-h-screen bg-cream px-6 lg:px-10 pt-6 pb-10">
+    <div className="min-h-screen bg-cream px-4 sm:px-6 lg:px-10 pt-4 sm:pt-6 pb-10">
       <div className="max-w-screen-2xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-brand">Our Products</h1>
-          <p className="text-gray-500 mt-1">
+        <header className="mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-brand">Our Products</h1>
+          <p className="text-sm sm:text-base text-gray-500 mt-1">
             Freshly baked and made to order. Pick your treats and add them to your cart.
           </p>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {products.length > 0 ? (
-            products.map((product) => {
-              const unavailable = !product.is_available || product.is_available === 0;
-              const qty = quantities[product.id] || 1;
-              return (
-                <div
-                  key={product.id}
-                  className={`relative bg-white rounded-2xl border border-line shadow-sm p-4 flex flex-col transition ${
-                    unavailable ? "opacity-70" : "hover:shadow-md hover:-translate-y-0.5"
-                  }`}
-                >
-                  <img
-                    src={getImageUrl(product.image_url)}
-                    alt={product.name}
-                    className={`w-full h-44 object-cover rounded-xl mb-4 ${unavailable ? "grayscale" : ""}`}
-                  />
-
-                  {unavailable && (
-                    <span className="absolute top-6 right-6 bg-white/95 text-red-600 text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
-                      Out of Stock
-                    </span>
-                  )}
-
-                  <div className="flex-1">
-                    {product.category?.name && (
-                      <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">
-                        {product.category.name}
-                      </p>
-                    )}
-                    <h2 className="text-lg font-semibold text-gray-800 leading-snug">
-                      {product.name}
-                    </h2>
-                    <p className="text-lg font-bold text-brand mt-1">
-                      ₱{Number(product.base_price).toFixed(2)}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between mt-4 gap-2">
-                    <div className="flex items-center rounded-full border border-line">
-                      <button
-                        type="button"
-                        aria-label="Decrease quantity"
-                        className="w-8 h-9 flex items-center justify-center text-gray-600 hover:text-brand disabled:opacity-40"
-                        onClick={() => handleQuantityChange(product.id, -1)}
-                        disabled={unavailable || qty <= 1}
-                      >
-                        <Minus size={16} />
-                      </button>
-                      <span className="w-6 text-center text-sm font-medium">{qty}</span>
-                      <button
-                        type="button"
-                        aria-label="Increase quantity"
-                        className="w-8 h-9 flex items-center justify-center text-gray-600 hover:text-brand disabled:opacity-40"
-                        onClick={() => handleQuantityChange(product.id, +1)}
-                        disabled={unavailable}
-                      >
-                        <Plus size={16} />
-                      </button>
-                    </div>
-
+        {groups.length > 0 && (
+          // Category filter: scrolls sideways on phones, stays under the navbar while scrolling
+          <div className="sticky top-0 md:top-16 z-20 -mx-4 px-4 sm:mx-0 sm:px-0 py-2 mb-4 sm:mb-6 bg-cream/95 backdrop-blur">
+            <div className="flex gap-2 overflow-x-auto no-scrollbar" role="tablist" aria-label="Product categories">
+              {[{ name: "all", label: "All", count: products.length }, ...groups.map((g) => ({ name: g.name, label: g.name, count: g.items.length }))].map(
+                ({ name, label, count }) => {
+                  const active = activeCategory === name;
+                  return (
                     <button
+                      key={name}
                       type="button"
-                      className="flex-1 whitespace-nowrap bg-brand hover:bg-brand-hover text-white text-sm font-semibold px-3 py-2.5 rounded-full transition disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
-                      onClick={() => handleAddToCart(product)}
-                      disabled={unavailable}
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => {
+                        setActiveCategory(name);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm font-medium border transition ${
+                        active
+                          ? "bg-brand text-white border-brand shadow-sm"
+                          : "bg-white text-gray-700 border-line hover:border-brand/50 hover:text-brand"
+                      }`}
                     >
-                      {unavailable ? "Unavailable" : "Add to Cart"}
+                      {label}
+                      <span className={`text-xs ${active ? "text-white/80" : "text-gray-400"}`}>{count}</span>
                     </button>
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="col-span-full bg-white border border-line rounded-2xl p-10 text-center text-gray-500">
-              No products available right now. Please check back soon.
+                  );
+                }
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {products.length === 0 ? (
+          <div className="bg-white border border-line rounded-2xl p-10 text-center text-gray-500">
+            No products available right now. Please check back soon.
+          </div>
+        ) : (
+          <div className="space-y-8 sm:space-y-10">
+            {visibleGroups.map((group) => (
+              <section key={group.name} aria-labelledby={`cat-${group.name}`}>
+                <h2
+                  id={`cat-${group.name}`}
+                  className="flex items-baseline gap-2 text-lg sm:text-2xl font-bold text-brand-deep mb-3 sm:mb-4"
+                >
+                  {group.name}
+                  <span className="text-xs sm:text-sm font-normal text-gray-400">
+                    {group.items.length} {group.items.length === 1 ? "item" : "items"}
+                  </span>
+                </h2>
+                <div className={gridClass}>{group.items.map(renderCard)}</div>
+              </section>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

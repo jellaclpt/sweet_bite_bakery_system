@@ -81,7 +81,7 @@ export default function Login() {
         </p>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
         <AuthField
           label="Username or email"
           icon={User}
@@ -110,7 +110,7 @@ export default function Login() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-brand hover:bg-brand-hover text-white font-semibold py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full bg-brand hover:bg-brand-hover text-white text-sm sm:text-base font-semibold py-2.5 sm:py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loading ? "Logging in..." : "Log in"}
         </button>

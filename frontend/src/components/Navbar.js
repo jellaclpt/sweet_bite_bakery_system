@@ -13,6 +13,7 @@ import {
 import api from "../api/api";
 import { getImageUrl } from "../utils/imageUrl";
 import logo from "../assets/logo.png";
+import { bubbleBurst } from "./bubbleBurst";
 
 export default function Navbar() {
   const { items } = useCart();
@@ -65,6 +66,14 @@ export default function Navbar() {
       href: "/orders",
       icon: <ClipboardList size={20} />,
     },
+  ];
+
+  const mobileItems = [
+    { label: "Home", href: "/", icon: Home },
+    { label: "Products", href: "/products", icon: Store },
+    { label: "Cart", href: "/checkout", icon: ShoppingCart, count: cartCount },
+    { label: "Orders", href: "/orders", icon: ClipboardList, count: orderCount },
+    { label: "Profile", href: "/profile", avatar: true },
   ];
 
   return (
@@ -126,36 +135,60 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* 📱 Mobile Bottom Navbar */}
-      <div className="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-lg flex justify-around items-center py-2 z-50" style={{ borderTop: `1px solid #e8ddd2` }}>
-        {navItems.map((item, index) => (
-          <button
-            key={index}
-            onClick={() => navigate(item.href)}
-            className={`relative flex flex-col items-center text-xs ${
-              location.pathname === item.href
-                ? "font-semibold"
-                : "text-gray-500"
-            }`}
-            style={location.pathname === item.href ? { color: "#974D07" } : {}}
-          >
-            {item.icon}
-            <span className="mt-1">{item.label}</span>
-          </button>
-        ))}
-
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="flex flex-col items-center text-xs text-gray-600 transition"
-          style={{ '--hover-color': '#974D07' }}
-          onMouseEnter={(e) => e.currentTarget.style.color = '#974D07'}
-          onMouseLeave={(e) => e.currentTarget.style.color = '#4b5563'}
-        >
-          <LogOut size={20} />
-          <span>Logout</span>
-        </button>
-      </div>
+      {/* Mobile bottom bar: short labels with count badges, and Profile (logout lives on the Profile page) */}
+      <nav
+        aria-label="Main"
+        className="md:hidden fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-line shadow-[0_-4px_16px_rgba(90,56,30,0.08)] z-50 pb-[env(safe-area-inset-bottom)]"
+      >
+        <ul className="grid grid-cols-5">
+          {mobileItems.map(({ label, href, icon: Icon, count, avatar }) => {
+            const active = location.pathname === href;
+            return (
+              <li key={href}>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    if (!active) bubbleBurst(e.currentTarget.firstChild, { count: 10 });
+                    navigate(href);
+                  }}
+                  aria-current={active ? "page" : undefined}
+                  className={`w-full flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] transition ${
+                    active ? "text-brand font-semibold" : "text-gray-500"
+                  }`}
+                >
+                  <span
+                    className={`relative flex items-center justify-center w-11 h-7 rounded-full transition ${
+                      active ? "bg-sand" : ""
+                    }`}
+                  >
+                    {avatar ? (
+                      user.image_url ? (
+                        <img
+                          src={getImageUrl(user.image_url)}
+                          alt=""
+                          className={`w-6 h-6 rounded-full object-cover ${active ? "ring-2 ring-brand" : ""}`}
+                        />
+                      ) : (
+                        <span className="w-6 h-6 rounded-full bg-sand text-brand text-xs font-semibold flex items-center justify-center">
+                          {(user.name || "U").charAt(0).toUpperCase()}
+                        </span>
+                      )
+                    ) : (
+                      <Icon size={20} />
+                    )}
+                    {count > 0 && (
+                      <span className="absolute -top-1 right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-brand text-white text-[10px] font-semibold flex items-center justify-center">
+                        {count > 99 ? "99+" : count}
+                      </span>
+                    )}
+                  </span>
+                  {label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
     </>
   );
 }

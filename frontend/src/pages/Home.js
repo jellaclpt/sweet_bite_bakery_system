@@ -22,7 +22,7 @@ export default function Home() {
       .get("/products")
       .then((res) => {
         const list = res.data?.data || res.data || [];
-        setFeatured(list.filter((p) => p.is_available).slice(0, 5));
+        setFeatured(list.filter((p) => p.is_available).slice(0, 6));
       })
       .catch(() => setFeatured([]));
   }, []);
@@ -30,34 +30,34 @@ export default function Home() {
   return (
     <div className="bg-cream">
       {/* Hero */}
-      <section className="px-6 lg:px-10 pt-6">
+      <section className="px-4 sm:px-6 lg:px-10 pt-4 sm:pt-6">
         <div
-          className="relative max-w-screen-2xl mx-auto rounded-3xl overflow-hidden bg-cover bg-center"
+          className="relative max-w-screen-2xl mx-auto rounded-2xl sm:rounded-3xl overflow-hidden bg-cover bg-center"
           style={{ backgroundImage: `url(${cakesBg})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-[#2b1608]/90 via-[#2b1608]/60 to-transparent" />
-          <div className="relative px-8 py-10 md:px-12 md:py-14 max-w-2xl text-white">
-            <p className="text-xs uppercase tracking-[0.2em] text-[#F3C99A] mb-3">Sweet Bite Bakery</p>
-            <h1 className="text-3xl md:text-5xl font-bold leading-[1.08] mb-4">
+          <div className="relative px-5 py-7 sm:px-8 sm:py-10 md:px-12 md:py-14 max-w-2xl text-white">
+            <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#F3C99A] mb-2 sm:mb-3">Sweet Bite Bakery</p>
+            <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold leading-[1.1] mb-3 sm:mb-4">
               Baked fresh,
               <br />
               ready when you are.
             </h1>
-            <p className="text-base text-white/85 mb-6 max-w-lg">
+            <p className="text-sm sm:text-base text-white/85 mb-5 sm:mb-6 max-w-lg">
               Pre-order cakes, breads and pastries for any day and time. We bake it for your schedule,
               so it’s fresh when you collect it.
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               <button
                 onClick={() => navigate("/products")}
-                className="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white px-6 py-2.5 rounded-full font-semibold shadow-sm transition"
+                className="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white px-4 py-2 text-sm sm:px-6 sm:py-2.5 sm:text-base rounded-full font-semibold shadow-sm transition"
               >
-                <ShoppingBag size={18} />
+                <ShoppingBag size={16} />
                 Start a Pre-order
               </button>
               <button
                 onClick={() => navigate("/orders")}
-                className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white px-6 py-2.5 rounded-full font-semibold backdrop-blur transition"
+                className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white px-4 py-2 text-sm sm:px-6 sm:py-2.5 sm:text-base rounded-full font-semibold backdrop-blur transition"
               >
                 Track my orders
               </button>
@@ -67,21 +67,21 @@ export default function Home() {
       </section>
 
       {/* How pre-ordering works */}
-      <section className="px-6 lg:px-10 py-12">
+      <section className="px-4 sm:px-6 lg:px-10 py-8 sm:py-12">
         <div className="max-w-screen-2xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-brand-deep mb-2">How pre-ordering works</h2>
-          <p className="text-gray-500 mb-8">Four simple steps from craving to cake box.</p>
-          <ol className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-brand-deep mb-1 sm:mb-2">How pre-ordering works</h2>
+          <p className="text-sm sm:text-base text-gray-500 mb-5 sm:mb-8">Four simple steps from craving to cake box.</p>
+          <ol className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-5">
             {STEPS.map(({ icon: Icon, title, text }, i) => (
-              <li key={title} className="bg-white border border-line rounded-2xl p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-5">
-                  <span className="w-11 h-11 rounded-xl bg-sand text-brand flex items-center justify-center">
-                    <Icon size={22} />
+              <li key={title} className="bg-white border border-line rounded-xl sm:rounded-2xl p-3.5 sm:p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-3 sm:mb-5">
+                  <span className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-sand text-brand flex items-center justify-center">
+                    <Icon className="w-[18px] h-[18px] sm:w-[22px] sm:h-[22px]" />
                   </span>
-                  <span className="text-3xl font-bold text-line">0{i + 1}</span>
+                  <span className="text-xl sm:text-3xl font-bold text-line">0{i + 1}</span>
                 </div>
-                <h3 className="font-semibold text-gray-800 mb-1">{title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{text}</p>
+                <h3 className="text-sm sm:text-base font-semibold text-gray-800 leading-snug mb-1">{title}</h3>
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{text}</p>
               </li>
             ))}
           </ol>
@@ -90,26 +90,26 @@ export default function Home() {
 
       {/* Featured products */}
       {featured.length > 0 && (
-        <section className="px-6 lg:px-10 pb-16">
+        <section className="px-4 sm:px-6 lg:px-10 pb-10 sm:pb-16">
           <div className="max-w-screen-2xl mx-auto">
-            <div className="flex items-end justify-between mb-6 gap-4">
+            <div className="flex items-end justify-between mb-4 sm:mb-6 gap-4">
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-brand-deep mb-1">Fresh from our ovens</h2>
-                <p className="text-gray-500">A few favorites you can pre-order today.</p>
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-brand-deep mb-1">Fresh from our ovens</h2>
+                <p className="text-sm sm:text-base text-gray-500">A few favorites you can pre-order today.</p>
               </div>
               <button
                 onClick={() => navigate("/products")}
-                className="hidden sm:inline-flex items-center gap-1.5 text-brand font-semibold hover:underline shrink-0"
+                className="inline-flex items-center gap-1 text-sm sm:text-base text-brand font-semibold hover:underline shrink-0"
               >
-                View all products <ArrowRight size={16} />
+                View all <span className="hidden sm:inline">products</span> <ArrowRight size={16} />
               </button>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-5">
-              {featured.map((p) => (
+            <div className="grid grid-cols-2 min-[480px]:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-5">
+              {featured.map((p, i) => (
                 <button
                   key={p.id}
                   onClick={() => navigate("/products")}
-                  className="group text-left bg-white border border-line rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition"
+                  className={`${i === 5 ? "xl:hidden " : ""}group text-left bg-white border border-line rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition`}
                 >
                   <div className="aspect-[4/3] overflow-hidden">
                     <img
@@ -118,12 +118,12 @@ export default function Home() {
                       className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                     />
                   </div>
-                  <div className="p-4">
+                  <div className="p-2.5 sm:p-4">
                     {p.category?.name && (
-                      <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">{p.category.name}</p>
+                      <p className="text-[10px] sm:text-xs uppercase tracking-wide text-gray-400 mb-1">{p.category.name}</p>
                     )}
-                    <p className="font-semibold text-gray-800 truncate">{p.name}</p>
-                    <p className="font-bold text-brand mt-0.5">₱{Number(p.base_price).toFixed(2)}</p>
+                    <p className="text-sm sm:text-base font-semibold text-gray-800 truncate">{p.name}</p>
+                    <p className="text-sm sm:text-base font-bold text-brand mt-0.5">₱{Number(p.base_price).toFixed(2)}</p>
                   </div>
                 </button>
               ))}

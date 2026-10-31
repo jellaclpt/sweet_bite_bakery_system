@@ -49,19 +49,15 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
 
       {/* Form panel */}
       <main className="flex-1 flex flex-col">
-        {/* Slim photo banner on phones, where the side panel is hidden */}
-        <div
-          className="lg:hidden h-40 bg-cover bg-center relative"
-          style={{ backgroundImage: `url(${cakesBg})` }}
-        >
-          <div className="absolute inset-0 bg-[#2b1608]/55" />
-        </div>
-
-        <div className="flex-1 flex items-center justify-center px-6 py-10 sm:px-10">
-          <div className="w-full max-w-md -mt-24 lg:mt-0 bg-white lg:bg-transparent rounded-2xl shadow-lg lg:shadow-none p-6 sm:p-8 lg:p-0">
-            <img src={logo} alt="Sweet Bite Logo" className="w-14 h-14 mb-5 lg:hidden mx-auto" />
-            <h1 className="text-3xl font-bold text-brand-deep">{title}</h1>
-            {subtitle && <p className="text-gray-500 mt-1 mb-8">{subtitle}</p>}
+        {/* Phones and tablets: no photo, just the logo and a compact form */}
+        <div className="flex-1 flex items-center justify-center px-5 py-8 sm:px-10 sm:py-10">
+          <div className="w-full max-w-md">
+            <div className="flex items-center gap-2 mb-6 lg:hidden">
+              <img src={logo} alt="" className="w-10 h-10 rounded-full" />
+              <span className="text-lg font-semibold text-brand">Sweet Bite</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-brand-deep">{title}</h1>
+            {subtitle && <p className="text-sm sm:text-base text-gray-500 mt-1 mb-6 sm:mb-8">{subtitle}</p>}
             {children}
             {footer && <div className="mt-6 text-sm text-gray-500 text-center">{footer}</div>}
           </div>
@@ -78,14 +74,14 @@ export function AuthField({ label, icon: Icon, type = "text", ...inputProps }) {
 
   return (
     <label className="block">
-      <span className="block text-sm font-medium text-gray-700 mb-1.5">{label}</span>
+      <span className="block text-sm font-medium text-gray-700 mb-1 sm:mb-1.5">{label}</span>
       <span className="relative block">
         {Icon && (
           <Icon size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
         )}
         <input
           type={isPassword && visible ? "text" : type}
-          className={`w-full rounded-xl border border-line bg-white py-3 ${Icon ? "pl-11" : "pl-4"} ${
+          className={`w-full rounded-xl border border-line bg-white py-2.5 sm:py-3 text-sm sm:text-base ${Icon ? "pl-11" : "pl-4"} ${
             isPassword ? "pr-11" : "pr-4"
           } text-gray-800 placeholder:text-gray-400 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/15`}
           {...inputProps}

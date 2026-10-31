@@ -82,8 +82,8 @@ export default function Register() {
         </p>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <AuthField label="Full Name" icon={User} placeholder="Juan Dela Cruz" autoComplete="name" {...field("name")} />
           <AuthField label="Phone Number" icon={Phone} type="tel" placeholder="09XX XXX XXXX" autoComplete="tel" {...field("phone")} />
         </div>
@@ -102,7 +102,7 @@ export default function Register() {
         />
         <AuthField label="Address" icon={MapPin} placeholder="Street, barangay, town" autoComplete="street-address" {...field("address")} />
         <AuthField label="Email" icon={Mail} type="email" placeholder="you@example.com" autoComplete="email" {...field("email")} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <AuthField label="Password" icon={Lock} type="password" placeholder="Password" autoComplete="new-password" {...field("password")} />
           <AuthField label="Confirm Password" icon={Lock} type="password" placeholder="Repeat it" autoComplete="new-password" {...field("password_confirmation")} />
         </div>
@@ -110,7 +110,7 @@ export default function Register() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-brand hover:bg-brand-hover text-white font-semibold py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed !mt-6"
+          className="w-full bg-brand hover:bg-brand-hover text-white text-sm sm:text-base font-semibold py-2.5 sm:py-3 rounded-xl shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed !mt-6"
         >
           {loading ? "Creating account..." : "Create Account"}
         </button>
