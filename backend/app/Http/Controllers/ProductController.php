@@ -68,11 +68,14 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $validated = $request->validate($this->rules());
 
+        // Upload the new photo first; the old one is removed only after everything is saved,
+        // so a failed upload never leaves the product without a picture
+        $oldImage = null;
         if ($request->hasFile('image')) {
-            PublicFiles::delete($product->image_url);
+            $oldImage = $product->image_url;
             $product->image_url = PublicFiles::store($request->file('image'), 'products');
         } elseif ($request->boolean('delete_image')) {
-            PublicFiles::delete($product->image_url);
+            $oldImage = $product->image_url;
             $product->image_url = null;
         }
 
@@ -82,6 +85,8 @@ class ProductController extends Controller
         $product->is_available = $request->boolean('is_available');
         $product->description = $validated['description'] ?? null;
         $product->save();
+
+        PublicFiles::delete($oldImage);
 
         return response()->json([
             'message' => 'Product updated successfully',
@@ -94,8 +99,9 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
 
-        PublicFiles::delete($product->image_url);
+        $image = $product->image_url;
         $product->delete();
+        PublicFiles::delete($image);
 
         return response()->json(['message' => 'Product deleted successfully']);
     }

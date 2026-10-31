@@ -27,7 +27,11 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(ForceJsonResponse::class)->group(function () {
 
     // ---------------------------------------------------------------- public
-    Route::get('/ping', fn () => response()->json(['message' => 'API is working!']));
+    // "uploads" says where images are saved ("cloudinary" or "server-disk"), handy after a deploy
+    Route::get('/ping', fn () => response()->json([
+        'message' => 'API is working!',
+        'uploads' => \App\Support\PublicFiles::driver(),
+    ]));
 
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/products', [ProductController::class, 'index']);
