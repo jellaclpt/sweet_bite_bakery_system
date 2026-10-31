@@ -88,7 +88,7 @@ export default function Login() {
           name="login"
           value={form.login}
           onChange={handleChange}
-          placeholder="e.g. carmen_l or you@example.com"
+          placeholder="e.g. user_01 or you@example.com"
           autoComplete="username"
           autoCapitalize="none"
           spellCheck={false}

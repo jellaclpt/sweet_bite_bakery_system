@@ -90,7 +90,7 @@ export default function Register() {
         <AuthField
           label="Username"
           icon={AtSign}
-          placeholder="e.g. carmen_l"
+          placeholder="e.g. user_01"
           autoComplete="username"
           autoCapitalize="none"
           spellCheck={false}
