@@ -131,14 +131,14 @@ export default function AdminOrders() {
         <table className="min-w-full text-sm">
           <thead className="bg-[#F7F3EF] text-gray-600">
             <tr>
-              <th className="px-4 py-3 text-left">Order</th>
-              <th className="px-4 py-3 text-left">Customer</th>
-              <th className="px-4 py-3 text-left">Items</th>
-              <th className="px-4 py-3 text-left">Schedule</th>
-              <th className="px-4 py-3 text-right">Total</th>
-              <th className="px-4 py-3 text-left">Payment</th>
-              <th className="px-4 py-3 text-left">Status</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-3 py-3 text-left">Order</th>
+              <th className="px-3 py-3 text-left">Customer</th>
+              <th className="px-3 py-3 text-left">Items</th>
+              <th className="px-3 py-3 text-left">Schedule</th>
+              <th className="px-3 py-3 text-right">Total</th>
+              <th className="px-3 py-3 text-left">Payment</th>
+              <th className="px-3 py-3 text-left">Status</th>
+              <th className="px-3 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -153,33 +153,33 @@ export default function AdminOrders() {
             ) : (
               visible.map((o) => (
                 <tr key={o.id} className="align-top hover:bg-[#FFF9F5]">
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-4">
                     <p className="font-semibold text-gray-800">#{o.id}</p>
                     <p className="text-xs text-gray-400">
                       {new Date(o.created_at).toLocaleDateString([], { month: "short", day: "numeric" })}
                     </p>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-4">
                     <p className="font-medium text-gray-800">{o.user?.name || "Guest"}</p>
                     <p className="text-xs text-gray-500">{o.user?.phone || o.user?.email}</p>
                   </td>
-                  <td className="px-4 py-4 max-w-[220px]">
+                  <td className="px-3 py-4 max-w-[190px]">
                     {(o.items || []).map((it) => (
                       <p key={it.id} className="text-gray-700 truncate">
                         {it.product_name} <span className="text-gray-400">× {it.quantity}</span>
                       </p>
                     ))}
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="px-3 py-4 whitespace-nowrap">
                     <p className="text-gray-800">{formatSchedule(o)}</p>
                     <p className="text-xs text-gray-500">{formatLabel(o.fulfillment)}</p>
                   </td>
-                  <td className="px-4 py-4 text-right whitespace-nowrap">
+                  <td className="px-3 py-4 text-right whitespace-nowrap">
                     <p className="font-semibold text-gray-800">{peso(o.total)}</p>
                     <p className="text-xs text-gray-500">Deposit {peso(o.deposit_amount)}</p>
                     <p className="text-xs text-gray-500">Received {peso(o.amount_paid)}</p>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-4">
                     <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${paymentStatusClass(o.payment_status)}`}>
                       {formatPaymentStatus(o.payment_status)}
                     </span>
@@ -192,10 +192,10 @@ export default function AdminOrders() {
                       </button>
                     )}
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-3 py-4">
                     <Select
                       size="sm"
-                      className="w-36"
+                      className="w-32"
                       value={STATUS_OPTIONS.includes(o.status) ? o.status : ""}
                       onChange={(e) => updateStatus(o, e.target.value)}
                       disabled={busyId === o.id}
@@ -204,11 +204,11 @@ export default function AdminOrders() {
                       options={STATUS_OPTIONS.map((s) => ({ value: s, label: formatLabel(s) }))}
                     />
                   </td>
-                  <td className="px-4 py-4 text-right whitespace-nowrap">
+                  <td className="px-3 py-4 text-right">
                     {o.payment_status === "deposit_submitted" && (
                       <button
                         onClick={() => setReviewing(o)}
-                        className="bg-brand hover:bg-brand-hover text-white text-xs font-semibold px-3 py-2 rounded-lg"
+                        className="whitespace-nowrap bg-brand hover:bg-brand-hover text-white text-xs font-semibold px-3 py-2 rounded-lg"
                       >
                         Review deposit
                       </button>
@@ -217,7 +217,7 @@ export default function AdminOrders() {
                       <button
                         onClick={() => updatePayment(o, "mark_paid", `Order #${o.id} marked fully paid`)}
                         disabled={busyId === o.id}
-                        className="border border-brand text-brand hover:bg-sand text-xs font-semibold px-3 py-2 rounded-lg disabled:opacity-50"
+                        className="whitespace-nowrap border border-brand text-brand hover:bg-sand text-xs font-semibold px-3 py-2 rounded-lg disabled:opacity-50"
                       >
                         Balance received
                       </button>
@@ -230,7 +230,7 @@ export default function AdminOrders() {
                       <button
                         onClick={() => updatePayment(o, "mark_paid", `Order #${o.id} marked fully paid`)}
                         disabled={busyId === o.id}
-                        className="border border-brand text-brand hover:bg-sand text-xs font-semibold px-3 py-2 rounded-lg disabled:opacity-50"
+                        className="whitespace-nowrap border border-brand text-brand hover:bg-sand text-xs font-semibold px-3 py-2 rounded-lg disabled:opacity-50"
                       >
                         Mark paid
                       </button>
