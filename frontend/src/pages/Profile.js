@@ -1,6 +1,7 @@
 // src/pages/Profile.js
 import React, { useState, useEffect, useRef } from "react";
-import { KeyRound, Lock, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { AtSign, Camera, KeyRound, Lock, LogOut, Mail, X } from "lucide-react";
 import { AuthField } from "../components/AuthLayout";
 import api from "../api/api";
 import toast from "react-hot-toast";
@@ -9,7 +10,15 @@ import { getImageUrl } from "../utils/imageUrl";
 import { MAX_UPLOAD_BYTES, shrinkImage } from "../utils/shrinkImage";
 
 export default function Profile() {
-  const { user, setUser } = useAuth(); // useAuth must provide setUser (updateUser)
+  const { user, setUser, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch {}
+    navigate("/login");
+  };
   const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
@@ -186,32 +195,52 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen pt-6 pb-8 px-4 bg-cream">
-      <div className="bg-white shadow-sm border border-line rounded-2xl p-6 sm:p-8 w-full max-w-lg mx-auto">
-        <h1 className="text-3xl font-bold text-center text-brand">My Profile</h1>
-        {user?.username && (
-          <p className="text-center text-sm text-gray-500 mt-1 mb-6">
-            Log in as <span className="font-medium text-brand-deep">@{user.username}</span>
-          </p>
-        )}
-        {!user?.username && <div className="mb-6" />}
+    <div className="min-h-screen pt-4 sm:pt-6 pb-8 px-4 bg-cream">
+      <div className="bg-white shadow-sm border border-line rounded-2xl p-5 sm:p-8 w-full max-w-lg mx-auto">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center text-brand mb-5">My Profile</h1>
 
-        <div className="flex justify-center mb-6">
-          <div
+        <div className="flex flex-col items-center mb-6">
+          <button
+            type="button"
             onClick={handleImageClick}
-            className="group relative w-32 h-32 rounded-full flex items-center justify-center cursor-pointer overflow-hidden border-4"
-            style={{ backgroundColor: "#f0e6dd", borderColor: "#e8ddd2" }}
+            aria-label="Change profile photo"
+            className="group relative w-24 h-24 sm:w-32 sm:h-32 rounded-full flex items-center justify-center cursor-pointer overflow-hidden border-4 border-line bg-sand"
           >
             {preview ? (
               <img src={preview} className="w-full h-full object-cover" alt="Profile" />
             ) : (
-              <span className="flex items-center justify-center w-full h-full select-none text-5xl font-semibold text-brand">
+              <span className="flex items-center justify-center w-full h-full select-none text-4xl sm:text-5xl font-semibold text-brand">
                 {(form?.name || user?.name || "U").charAt(0).toUpperCase()}
               </span>
             )}
             <div className="absolute inset-0 flex items-end justify-center pb-3 pointer-events-none text-xs font-medium text-white bg-black/30 opacity-0 group-hover:opacity-100 transition">
               Change photo
             </div>
+          </button>
+          <button
+            type="button"
+            onClick={handleImageClick}
+            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"
+          >
+            <Camera size={13} /> Change photo
+          </button>
+
+          {/* Account details */}
+          <div className="mt-4 w-full rounded-xl bg-cream border border-line divide-y divide-line text-sm">
+            {user?.username && (
+              <div className="flex items-center gap-2 px-3.5 py-2.5">
+                <AtSign size={15} className="text-brand shrink-0" />
+                <span className="text-gray-500">Username</span>
+                <span className="ml-auto font-medium text-gray-800 truncate">@{user.username}</span>
+              </div>
+            )}
+            {user?.email && (
+              <div className="flex items-center gap-2 px-3.5 py-2.5">
+                <Mail size={15} className="text-brand shrink-0" />
+                <span className="text-gray-500">Email</span>
+                <span className="ml-auto font-medium text-gray-800 truncate">{user.email}</span>
+              </div>
+            )}
           </div>
           <input
             ref={fileInputRef}
@@ -225,41 +254,40 @@ export default function Profile() {
 
         <form onSubmit={handleUpdate} className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-600">Full Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
             <input
               name="name"
               value={form.name}
               onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm sm:text-base text-gray-800 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/15"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600">Phone</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
             <input
               name="phone"
               value={form.phone}
               onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm sm:text-base text-gray-800 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/15"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600">Address</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
             <textarea
               name="address"
               value={form.address}
               onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm sm:text-base text-gray-800 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/15"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full text-white py-2 rounded-lg"
-            style={{ backgroundColor: "#974D07" }}
+            className="w-full bg-brand hover:bg-brand-hover text-white text-sm sm:text-base font-semibold py-2.5 rounded-xl transition disabled:opacity-60"
           >
             {loading ? "Saving..." : "Save Profile"}
           </button>
@@ -267,8 +295,7 @@ export default function Profile() {
 
         <button
           onClick={() => setShowPasswordModal(true)}
-          className="w-full mt-4 rounded-lg py-2 border-2"
-          style={{ borderColor: "#d4a574", color: "#974D07" }}
+          className="w-full mt-3 rounded-xl py-2.5 border border-brand/40 text-brand text-sm sm:text-base font-semibold hover:bg-sand transition"
         >
           {settingFirstPassword ? "Set a Password" : "Change Password"}
         </button>
@@ -277,6 +304,14 @@ export default function Profile() {
             Your account doesn't have a password yet. Set one to log in.
           </p>
         )}
+
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="w-full mt-6 pt-5 border-t border-line inline-flex items-center justify-center gap-2 text-sm sm:text-base font-semibold text-red-600 hover:text-red-700"
+        >
+          <LogOut size={17} /> Log out
+        </button>
       </div>
 
       {/* Password Modal */}
